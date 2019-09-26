@@ -1,7 +1,7 @@
 # Club-Car
-Group Project for Web Programming
+Group Project for Web Programming.
 
-The game will involve drivinig cars
+The game will involve driving cars.
 
 Draft Ideas: RPG Game,
              Racing Game,
