@@ -6,4 +6,4 @@ The game will involve driving cars.
 Draft Ideas: RPG Game,
              Racing Game,
              Collecting Cars,
-             BIG GIANT GUNS (Pew Pew),
+             Guns with relatively large size (of which may make such noises as resemble "pew, pew"),
