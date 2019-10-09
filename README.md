@@ -6,4 +6,3 @@ The game will involve driving cars.
 Draft Ideas: RPG Game,
              Racing Game,
              Collecting Cars,
-             Possible combat between cars (guns etc),
