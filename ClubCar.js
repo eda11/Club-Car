@@ -1,13 +1,14 @@
 //The starting position for the car
 x = 400;
 y = 400;
-accelaration = 0.2;
+accelaration = 0.4;
 maxSpeed = 6;
 speedX = 0;
 speedY = 0;
-friction = 0.1;
+friction = 0.2;
 angle = 0;
 mod = 0;
+angleMod = 0;
 canvas = document.getElementById("gameSpace");
 context = canvas.getContext("2d");
 
@@ -37,7 +38,11 @@ function draw() {
 }
 
 function calculateSpeed(){
+
+    angle += angleMod*mod*0.03
+
     //Increase the speed in the correct direction
+
     speedX += accelaration*Math.cos(angle)*mod; 
     speedY += accelaration*Math.sin(angle)*mod;
 
@@ -77,6 +82,9 @@ function keyup_handler(event) {
     if (event.keyCode == 87 || event.keyCode == 83) {
         mod = 0;
     }
+    if (event.keyCode == 65 || event.keyCode == 68) {
+        angleMod = 0;
+    } 
 }
 
 function keypress_handler(event) {
@@ -88,10 +96,10 @@ function keypress_handler(event) {
         mod = -1;
     }
     if (event.keyCode == 65) {
-        angle -= 0.05;
+        angleMod = -1;
     }
     if (event.keyCode == 68) {
-        angle += 0.05;
+        angleMod = 1;
     }
 }
 
