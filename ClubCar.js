@@ -47,9 +47,9 @@ function calculateSpeed(){
     speedY += accelaration*Math.sin(angle)*mod;
 
     //Decrease the speeds by the friction
-    speedX = Approach(speedX, 0, friction);
-    speedY = Approach(speedY, 0, friction);
-    console.log("X :" + friction*Math.sin(angle) + "    Y : ")
+    speedX = Approach(speedX, 0, friction*Math.abs(speedX/maxSpeed));
+    speedY = Approach(speedY, 0, friction*Math.abs(speedY/maxSpeed));
+    //console.log("X :" + Math.abs(friction*Math.sin(angle)) + "    Y : " + Math.abs(friction*Math.sin(angle)))
     
     //Keep the speed within the maximums
     if (speedX > maxSpeed) {speedX = maxSpeed};
@@ -58,8 +58,12 @@ function calculateSpeed(){
     if (speedY < -maxSpeed) {speedY = -maxSpeed};
 
     //Prevents going off screen
-    if ((x+speedX < 1600)*(x+speedX > 0)) {x += speedX};
-    if ((y+speedY < 800)*(y+speedY > 0)) {y += speedY};
+    if ((x+speedX < 1600)*(x+speedX > 0)) {x += speedX}
+    else {speedX = -speedX*0.4; speedY = -speedY*0.4}
+    if ((y+speedY < 800)*(y+speedY > 0)) {y += speedY}
+    else {speedX = -speedX*0.4; speedY = -speedY*0.4}
+
+
 }
 
 function drawCar(c1x,c1y,c2x,c2y,c3x,c3y,c4x,c4y) {
