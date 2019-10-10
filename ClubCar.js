@@ -29,12 +29,14 @@ function draw() {
 
     context.fillStyle = "rgb(200, 100, 220)";
 
+    calculateSpeed();
+
     drawCar(cornerCalcX(x+10,y+10),cornerCalcY(x+10,y+10),
             cornerCalcX(x-30,y+10),cornerCalcY(x-30,y+10),
             cornerCalcX(x-30,y-10),cornerCalcY(x-30,y-10),
             cornerCalcX(x+10,y-10),cornerCalcY(x+10,y-10));
 
-    calculateSpeed();
+    
 }
 
 function calculateSpeed(){
@@ -52,10 +54,10 @@ function calculateSpeed(){
     //console.log("X :" + Math.abs(friction*Math.sin(angle)) + "    Y : " + Math.abs(friction*Math.sin(angle)))
     
     //Keep the speed within the maximums
-    if (speedX > maxSpeed) {speedX = maxSpeed};
-    if (speedX < -maxSpeed) {speedX = -maxSpeed};
-    if (speedY > maxSpeed) {speedY = maxSpeed};
-    if (speedY < -maxSpeed) {speedY = -maxSpeed};
+   // if (speedX > maxSpeed) {speedX = maxSpeed};
+    //if (speedX < -maxSpeed) {speedX = -maxSpeed};
+    //if (speedY > maxSpeed) {speedY = maxSpeed};
+    //if (speedY < -maxSpeed) {speedY = -maxSpeed};
 
     //Prevents going off screen
     if ((x+speedX < 1600)*(x+speedX > 0)) {x += speedX}
@@ -98,7 +100,7 @@ function keypress_handler(event) {
         mod = 1;
     }
     if (event.keyCode == 83) {
-        mod = -1;
+        mod = -0.6;
     }
     if (event.keyCode == 65) {
         angleMod = -1;
