@@ -91,6 +91,9 @@ function keypress_handler(event) {
     }
 }
 
+
+//Takes a value and moves it towards the desired ammount
+//while not wrapping over. Works both with negative and positive
 function Approach(currentValue, desiredValue, ammount ) {
     if (currentValue < desiredValue) {
         currentValue += ammount;
