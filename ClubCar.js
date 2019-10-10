@@ -37,17 +37,21 @@ function draw() {
 }
 
 function calculateSpeed(){
+    //Increase the speed in the correct direction
     speedX += accelaration*Math.cos(angle)*mod; 
     speedY += accelaration*Math.sin(angle)*mod;
 
+    //Decrease the speeds by the friction
     speedX = Approach(speedX, 0, friction);
     speedY = Approach(speedY, 0, friction);
     
+    //Keep the speed within the maximums
     if (speedX > maxSpeed) {speedX = maxSpeed};
     if (speedX < -maxSpeed) {speedX = -maxSpeed};
     if (speedY > maxSpeed) {speedY = maxSpeed};
     if (speedY < -maxSpeed) {speedY = -maxSpeed};
 
+    //Prevents going off screen
     if ((x+speedX < 1600)*(x+speedX > 0)) {x += speedX};
     if ((y+speedY < 800)*(y+speedY > 0)) {y += speedY};
 }
