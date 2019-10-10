@@ -1,10 +1,11 @@
+//The starting position for the car
 x = 400;
 y = 400;
 accelaration = 0.2;
 maxSpeed = 6;
 speedX = 0;
 speedY = 0;
-friction = 0.08;
+friction = 0.1;
 angle = 0;
 mod = 0;
 canvas = document.getElementById("gameSpace");
@@ -39,12 +40,8 @@ function calculateSpeed(){
     speedX += accelaration*Math.cos(angle)*mod; 
     speedY += accelaration*Math.sin(angle)*mod;
 
-    if (speedX > 0) {speedX -= friction};
-    if (speedX < 0) {speedX += friction};
-
-    if (speedY > 0) {speedY -= friction};
-    if (speedY < 0) {speedY += friction};
-
+    speedX = Approach(speedX, 0, friction);
+    speedY = Approach(speedY, 0, friction);
     
     if (speedX > maxSpeed) {speedX = maxSpeed};
     if (speedX < -maxSpeed) {speedX = -maxSpeed};
@@ -92,4 +89,20 @@ function keypress_handler(event) {
     if (event.keyCode == 68) {
         angle += 0.05;
     }
+}
+
+function Approach(currentValue, desiredValue, ammount ) {
+    if (currentValue < desiredValue) {
+        currentValue += ammount;
+        if (currentValue > desiredValue) {
+            return desiredValue;
+        }
+    }
+    else {
+        currentValue -= ammount
+        if (currentValue < desiredValue){
+            return desiredValue;
+        }
+    }
+    return currentValue
 }
