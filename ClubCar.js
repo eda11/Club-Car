@@ -29,17 +29,17 @@ function draw() {
 
     context.fillStyle = "rgb(200, 100, 220)";
 
-    drawCar(cornerCalcX(x+30,y+10),cornerCalcY(x+30,y+10),
-            cornerCalcX(x-10,y+10),cornerCalcY(x-10,y+10),
-            cornerCalcX(x-10,y-10),cornerCalcY(x-10,y-10),
-            cornerCalcX(x+30,y-10),cornerCalcY(x+30,y-10));
+    drawCar(cornerCalcX(x+10,y+10),cornerCalcY(x+10,y+10),
+            cornerCalcX(x-30,y+10),cornerCalcY(x-30,y+10),
+            cornerCalcX(x-30,y-10),cornerCalcY(x-30,y-10),
+            cornerCalcX(x+10,y-10),cornerCalcY(x+10,y-10));
 
     calculateSpeed();
 }
 
 function calculateSpeed(){
 
-    angle += angleMod*mod*0.03
+    angle += angleMod*0.03
 
     //Increase the speed in the correct direction
 
@@ -49,6 +49,7 @@ function calculateSpeed(){
     //Decrease the speeds by the friction
     speedX = Approach(speedX, 0, friction);
     speedY = Approach(speedY, 0, friction);
+    console.log("X :" + friction*Math.sin(angle) + "    Y : ")
     
     //Keep the speed within the maximums
     if (speedX > maxSpeed) {speedX = maxSpeed};
