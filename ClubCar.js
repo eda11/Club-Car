@@ -1,6 +1,6 @@
 //The starting position for the car
-x = 400;
-y = 400;
+x = 0;
+y = 0;
 accelaration = 0.4;
 maxSpeed = 6;
 speedX = 0;
@@ -11,6 +11,8 @@ mod = 0;
 angleMod = 0;
 canvas = document.getElementById("gameSpace");
 context = canvas.getContext("2d");
+var img = new Image();
+img.src = "Sprites/CarTest.png";
 
 window.addEventListener("keydown", keypress_handler, false);
 window.addEventListener("keyup", keyup_handler, false);
@@ -27,16 +29,21 @@ function draw() {
     context = canvas.getContext("2d");
     context.clearRect(0, 0, 1600, 1600);
 
-    context.fillStyle = "rgb(200, 100, 220)";
+    //context.fillStyle = "rgb(200, 100, 220)";
 
-    calculateSpeed();
-
+    context.save();
+    context.translate(x, y);
+    context.rotate(angle);
+    context.drawImage(img, 10-(img.width), 10-(img.height));
+    context.restore();
+    /*
     drawCar(cornerCalcX(x+10,y+10),cornerCalcY(x+10,y+10),
             cornerCalcX(x-30,y+10),cornerCalcY(x-30,y+10),
             cornerCalcX(x-30,y-10),cornerCalcY(x-30,y-10),
             cornerCalcX(x+10,y-10),cornerCalcY(x+10,y-10));
+            */
 
-    
+    calculateSpeed();
 }
 
 function calculateSpeed(){
