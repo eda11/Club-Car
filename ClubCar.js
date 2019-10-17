@@ -38,13 +38,22 @@ function draw() {
     context = canvas.getContext("2d");
     context.clearRect(0, 0, 1600, 1600);
 
+    //Draw the background
     context.save();
     context.translate(-x, -y);
     context.drawImage(background,0,0);
+    context.restore();
+
+    //Draw another car
+    context.save();
+    context.translate(-x + 800, -y + 800);
+    context.rotate(angle);
+    context.drawImage(img, 10-(img.width), 10-(img.height));
     context.restore(); 
 
     //context.fillStyle = "rgb(200, 100, 220)";
 
+    //Draw the player
     context.save();
     context.translate(800, 400);
     context.rotate(angle);
