@@ -13,6 +13,8 @@ canvas = document.getElementById("gameSpace");
 context = canvas.getContext("2d");
 var img = new Image();
 img.src = "Sprites/CarTest.png";
+var background = new Image();
+background.src = "Sprites/Background Test.png";
 
 window.addEventListener("keydown", keypress_handler, false);
 window.addEventListener("keyup", keyup_handler, false);
@@ -28,6 +30,7 @@ var moveInterval = setInterval(function () {
 function draw() {
     context = canvas.getContext("2d");
     context.clearRect(0, 0, 1600, 1600);
+    context.drawImage(background,0,0);   
 
     //context.fillStyle = "rgb(200, 100, 220)";
 
