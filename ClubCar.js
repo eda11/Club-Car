@@ -1,6 +1,13 @@
 //The starting position for the car
-x = 0;
-y = 0;
+startx = 800
+starty = 400
+
+widthBackground = 2000
+heightBackground = 2000
+
+
+x = startx;
+y = starty;
 accelaration = 0.4;
 maxSpeed = 6;
 speedX = 0;
@@ -30,12 +37,16 @@ var moveInterval = setInterval(function () {
 function draw() {
     context = canvas.getContext("2d");
     context.clearRect(0, 0, 1600, 1600);
-    context.drawImage(background,0,0);   
+
+    context.save();
+    context.translate(-x, -y);
+    context.drawImage(background,0,0);
+    context.restore(); 
 
     //context.fillStyle = "rgb(200, 100, 220)";
 
     context.save();
-    context.translate(x, y);
+    context.translate(800, 400);
     context.rotate(angle);
     context.drawImage(img, 10-(img.width), 10-(img.height));
     context.restore();
@@ -63,16 +74,11 @@ function calculateSpeed(){
     speedY = Approach(speedY, 0, friction*Math.abs(speedY/maxSpeed));
     //console.log("X :" + Math.abs(friction*Math.sin(angle)) + "    Y : " + Math.abs(friction*Math.sin(angle)))
     
-    //Keep the speed within the maximums
-   // if (speedX > maxSpeed) {speedX = maxSpeed};
-    //if (speedX < -maxSpeed) {speedX = -maxSpeed};
-    //if (speedY > maxSpeed) {speedY = maxSpeed};
-    //if (speedY < -maxSpeed) {speedY = -maxSpeed};
 
     //Prevents going off screen
-    if ((x+speedX < 1600)*(x+speedX > 0)) {x += speedX}
+    if ((x+speedX < widthBackground-startx)*(x+speedX > -startx)) {x += speedX}
     else {speedX = -speedX*0.4; speedY = -speedY*0.4}
-    if ((y+speedY < 800)*(y+speedY > 0)) {y += speedY}
+    if ((y+speedY < heightBackground-starty)*(y+speedY > -starty)) {y += speedY}
     else {speedX = -speedX*0.4; speedY = -speedY*0.4}
 
 
@@ -138,3 +144,4 @@ function Approach(currentValue, desiredValue, ammount ) {
     }
     return currentValue
 }
+
