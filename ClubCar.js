@@ -34,6 +34,14 @@ var moveInterval = setInterval(function () {
     draw();
 }, 15);
 
+function on() {
+  document.getElementById("overlay").style.display = "block";
+}
+
+function off() {
+  document.getElementById("overlay").style.display = "none";
+}
+
 function draw() {
     context = canvas.getContext("2d");
     context.clearRect(0, 0, 1600, 1600);
@@ -136,6 +144,7 @@ function keypress_handler(event) {
 }
 
 
+
 //Takes a value and moves it towards the desired ammount
 //while not wrapping over. Works both with negative and positive
 function Approach(currentValue, desiredValue, ammount ) {
@@ -153,4 +162,5 @@ function Approach(currentValue, desiredValue, ammount ) {
     }
     return currentValue
 }
+
 

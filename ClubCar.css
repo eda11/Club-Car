@@ -1,9 +1,41 @@
 #gameSpace {
   border: 2px solid #333;
+  position: relative;
+  width: 90%;
+  height: 90%;
+  align: center;
+  
 }
 
-body {
-  text-align: center;
+html, body{
+  min-height: 100%;
+}
+body{
+  position: relative;
+}
+
+#overlay{
+  position: fixed;
+  display: block;
+  top: 0%;
+  left: 0%;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  background-color: rgba(0,0,0,0.5); /*dim the background*/
+  cursor: pointer ;
+}
+
+
+
+#text{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 50px;
+  color: red;
+  transform: translate(-50%,-50%);
+  -ms-transform: translate(-50%,-50%);
 }
 
 @import url(https://fonts.googleapis.com/css?family=Pacifico);
@@ -80,8 +112,6 @@ h1{
   90%{color: DodgerBlue;}
 	100%{color: orange;}
 }
-	
-
 
 .container{
   background-color:#E0F2F1;
