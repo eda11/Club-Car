@@ -30,6 +30,166 @@ window.addEventListener("keyup", keyup_handler, false);
 var ctx = canvas.getContext('2d');
 ctx.fillStyle = '#f00';
 
+class Car {
+    constructor(x, y, angle, image) {
+        this.startx = x;
+        this.starty = y;
+
+        this.x = x;
+        this.y = y;
+        
+        this.friction = 0.2;
+        this.accelaration = 0.4;
+        this.maxSpeed = 6;
+
+        this.speedX = 0;
+        this.speedY = 0;
+        this.angleSpeed = 0;
+
+        this.angle = angle;
+        this.img = new Image();
+        this.img.src = image;
+        
+        this.c1x = 0;
+        this.c1y = 0;
+
+        this.c2x = 0;
+        this.c2y = 0;
+
+        this.c3x = 0;
+        this.c3y = 0;
+
+        this.c4x = 0;
+        this.c4y = 0;
+
+        this.updateCorners();
+
+        this.otherCars = [];
+    }
+
+    updateCorners(){
+        this.c1x = Math.round((Math.cos(this.angle)*(10)) - (Math.sin(this.angle)*(10)) + this.x);
+        this.c1y = Math.round((Math.sin(this.angle)*(10)) + (Math.cos(this.angle)*(10)) + this.y);
+
+        this.c2x = Math.round((Math.cos(this.angle)*(-30)) - (Math.sin(this.angle)*(10)) + this.x);
+        this.c2y = Math.round((Math.sin(this.angle)*(-30)) + (Math.cos(this.angle)*(10)) + this.y);
+
+        this.c3x = Math.round((Math.cos(this.angle)*(-30)) - (Math.sin(this.angle)*(-10)) + this.x);
+        this.c3y = Math.round((Math.sin(this.angle)*(-30)) + (Math.cos(this.angle)*(-10)) + this.y);
+
+        this.c4x = Math.round((Math.cos(this.angle)*(10)) - (Math.sin(this.angle)*(-10)) + this.x);
+        this.c4y = Math.round((Math.sin(this.angle)*(10)) + (Math.cos(this.angle)*(-10)) + this.y);
+    }
+
+    addCar(car){
+        this.otherCars.push(car);
+    }
+
+    lineCrossesCar(x1,y1,x2,y2,car){
+        if (!(null == intersect(x1,y1,x2,y2,car.c1x,car.c1y,car.c2x,car.c2y))){
+            return intersect(x1,y1,x2,y2,car.c1x,car.c1y,car.c2x,car.c2y);
+        }
+        if (!(null == intersect(x1,y1,x2,y2,car.c2x,car.c2y,car.c3x,car.c3y))){
+            return intersect(x1,y1,x2,y2,car.c2x,car.c2y,car.c3x,car.c3y);
+        }
+        if (!(null == intersect(x1,y1,x2,y2,car.c3x,car.c3y,car.c4x,car.c4y))){
+            return intersect(x1,y1,x2,y2,car.c3x,car.c3y,car.c4x,car.c4y);
+        }
+        if (!(null == intersect(x1,y1,x2,y2,car.c4x,car.c4y,car.c1x,car.c1y))){
+            return intersect(x1,y1,x2,y2,car.c3x,car.c3y,car.c4x,car.c4y);
+        }
+        return null;
+    }
+
+    checkCarCollison(){
+        for (let i = 0; i < this.otherCars.length; i++){
+            if (!(null == this.lineCrossesCar(this.c1x,this.c1y,this.c2x,this.c2y,this.otherCars[i]))){
+                this.carCollide(this.lineCrossesCar(this.c1x,this.c1y,this.c2x,this.c2y,this.otherCars[i]),this.otherCars[i]);
+                break;
+            }
+            if (!(null == this.lineCrossesCar(this.c2x,this.c2y,this.c3x,this.c3y,this.otherCars[i]))){
+                this.carCollide(this.lineCrossesCar(this.c2x,this.c2y,this.c3x,this.c3y,this.otherCars[i]),this.otherCars[i]);
+                break;
+            }
+            if (!(null == this.lineCrossesCar(this.c3x,this.c3y,this.c4x,this.c4y,this.otherCars[i]))){
+                this.carCollide(this.lineCrossesCar(this.c3x,this.c3y,this.c4x,this.c4y,this.otherCars[i]),this.otherCars[i]);
+                break;
+            }
+            if (!(null == this.lineCrossesCar(this.c4x,this.c4y,this.c1x,this.c1y,this.otherCars[i]))){
+                this.carCollide(this.lineCrossesCar(this.c4x,this.c4y,this.c1x,this.c1y,this.otherCars[i]),this.otherCars[i]);
+                break;
+            }
+        }
+    }
+
+    carCollide(coor,car){
+        x = coor[0];
+        y = coor[1];
+        //colAng = Math.atan(y/x)
+        //applyX = speedX*Math.sin(colAng)
+        //applyY = speedY*Math.cos(colAng)
+
+        var tspeedx = this.speedX
+        var tspeedy = this.speedY
+        
+        this.speedX += 0.5*car.speedX - 1.4*tspeedx
+        this.speedY += 0.5*car.speedY - 1.4*tspeedy
+
+        car.speedX += 0.5*tspeedx
+        car.speedY += 0.5*tspeedy
+    }
+
+    test(){
+        console.log(this.checkCarCollison());
+    }
+
+    drawSelf(context) {
+        context.save();
+        context.translate(800, 400);
+        context.rotate(this.angle);
+        context.drawImage(this.img, 10-(this.img.width), 10-(this.img.height));
+        context.restore();
+    }
+
+    drawCar(car,context){
+        context.save();
+        context.translate(car.x-(this.x-800), car.y-(this.y-400));
+        context.rotate(car.angle);
+        context.drawImage(car.img, 10-(car.img.width), 10-(car.img.height));
+        context.restore();
+    }
+
+    drawOther(image,imageAngle,imageX,imageY,offSetX,offSetY,context){
+        context.save();
+        context.translate(imageX-(this.x-800), imageY-(this.y-400));
+        context.rotate(imageAngle);
+        context.drawImage(image,offSetX,offSetY);
+        context.restore();
+    }
+
+    calculateSpeed(speedMod,angleMod){
+        //Increase the speed in the correct direction
+        this.angleSpeed += angleMod*0.005;
+        this.speedX += this.accelaration*Math.cos(this.angle)*speedMod; 
+        this.speedY += this.accelaration*Math.sin(this.angle)*speedMod;
+
+        //Decrease the speeds by the friction
+        this.angleSpeed = Approach(this.angleSpeed,0,0.005*Math.abs(this.angleSpeed/0.06))
+        this.speedX = Approach(this.speedX, 0, this.friction*Math.abs(this.speedX/this.maxSpeed));
+        this.speedY = Approach(this.speedY, 0, this.friction*Math.abs(this.speedY/this.maxSpeed));
+
+        this.angle += this.angleSpeed;
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        this.updateCorners();
+    }
+}
+
+var player = new Car(800,800,20,"Sprites/CarTest.png");
+var otherCar = new Car(800,600,20,"Sprites/CarTest.png");
+player.addCar(otherCar);
+otherCar.addCar(player);
 
 var moveInterval = setInterval(function () {
     draw();
@@ -47,101 +207,20 @@ function draw() {
     context = canvas.getContext("2d");
     context.clearRect(0, 0, 1600, 1600);
 
-    //Draw the background
-    context.save();
-    context.translate(-x, -y);
-    context.drawImage(background,0,0);
-    context.beginPath();
-    context.rect(20, 20, 150, 100);
-    context.stroke();
-    context.restore();
-
-    //Draw another car
-    context.save();
-    context.translate(-x + 800, -y + 800);
-    context.rotate(angle);
-    context.drawImage(img, 10-(img.width), 10-(img.height));
-    context.restore(); 
-
-    //context.fillStyle = "rgb(200, 100, 220)";
-
-    //Draw the player
-    context.save();
-    context.translate(800, 400);
-    context.rotate(angle);
-    context.drawImage(img, 10-(img.width), 10-(img.height));
-    context.restore();
+    //player.test();
+    player.test();
     
-    drawCar(cornerCalcX(x+10,y+10),cornerCalcY(x+10,y+10),
-            cornerCalcX(x-30,y+10),cornerCalcY(x-30,y+10),
-            cornerCalcX(x-30,y-10),cornerCalcY(x-30,y-10),
-            cornerCalcX(x+10,y-10),cornerCalcY(x+10,y-10));
-            
 
-    calculateSpeed();
-}
+    angle += 0.01
 
-function calculateSpeed(){
+    player.drawOther(background,0,0,0,0,0,context);
+    player.drawCar(otherCar,context);
+    player.drawSelf(context);
 
-    //Increase the speed in the correct direction
-    
-    angleSpeed += angleMod*0.005;
-    speedX += accelaration*Math.cos(angle)*mod; 
-    speedY += accelaration*Math.sin(angle)*mod;
+    otherCar.calculateSpeed(0,0);
+    player.calculateSpeed(mod,angleMod);
 
-    //Decrease the speeds by the friction
-    angleSpeed = Approach(angleSpeed,0,0.005*Math.abs(angleSpeed/0.06))
-    speedX = Approach(speedX, 0, friction*Math.abs(speedX/maxSpeed));
-    speedY = Approach(speedY, 0, friction*Math.abs(speedY/maxSpeed));
-    //console.log("X :" + Math.abs(friction*Math.sin(angle)) + "    Y : " + Math.abs(friction*Math.sin(angle)))
-
-    c1 = (offScreen(cornerCalcX(x + speedX +10,y + speedY +10,angle + angleSpeed),cornerCalcY(x + speedX +10,y + speedY +10,angle + angleSpeed)))
-    c2 = (offScreen(cornerCalcX(x + speedX -30,y + speedY +10,angle + angleSpeed),cornerCalcY(x + speedX -30,y + speedY +10,angle + angleSpeed)))
-    c3 = (offScreen(cornerCalcX(x + speedX -30,y + speedY -10,angle + angleSpeed),cornerCalcY(x + speedX -30,y + speedY -10,angle + angleSpeed)))
-    c4 = (offScreen(cornerCalcX(x + speedX +10,y + speedY -10,angle + angleSpeed),cornerCalcY(x + speedX +10,y + speedY -10,angle + angleSpeed)))
-
-    console.log(c1)
-
-    //Prevents going off screen
-    if (c1*c2*c3*c4) {x += speedX,y += speedY,angle += angleSpeed}
-    else {speedX = -speedX*0.4; speedY = -speedY*0.4; angleSpeed = -angleSpeed*0.4 }
-
-    c1 = (offScreen(cornerCalcX(x + speedX +10,y +10,angle + angleSpeed),cornerCalcY(x + speedX +10,y +10,angle)))
-    c2 = (offScreen(cornerCalcX(x + speedX -30,y +10,angle + angleSpeed),cornerCalcY(x + speedX -30,y +10,angle)))
-    c3 = (offScreen(cornerCalcX(x + speedX -30,y -10,angle + angleSpeed),cornerCalcY(x + speedX -30,y -10,angle)))
-    c4 = (offScreen(cornerCalcX(x + speedX +10,y -10,angle + angleSpeed),cornerCalcY(x + speedX +10,y -10,angle)))
-
-    if (!(c1*c2*c3*c4)){
-        x = Approach(x, startx, 2);
-        y = Approach(y, starty, 2);
-        speedX = Approach(speedX, 0, friction);
-        speedY = Approach(speedY, 0, friction);
-    }
-
-
-}
-
-function drawCar(c1x,c1y,c2x,c2y,c3x,c3y,c4x,c4y) {
-    context.beginPath();
-    context.moveTo(c1x,c1y);
-    context.lineTo(c2x,c2y);
-    context.lineTo(c3x,c3y);
-    context.lineTo(c4x,c4y);
-    context.closePath();
-    context.fill();
-}
-
-function offScreen(x,y){
-    if   (((x+speedX < widthBackground-startx)*(x+speedX > -startx))*((y+speedY < heightBackground-starty)*(y+speedY > -starty))) {return true}
-    else {return false}
-
-}
-
-function cornerCalcX(cornerX,cornerY,angle){
-    return (Math.cos(angle)*(cornerX-x)) - (Math.sin(angle)*(cornerY-y)) + x;
-}
-function cornerCalcY(cornerX,cornerY,angle){
-    return (Math.sin(angle)*(cornerX-x)) + (Math.cos(angle)*(cornerY-y)) + y;
+    player.checkCarCollison();
 }
 
 function keyup_handler(event) {
@@ -168,8 +247,6 @@ function keypress_handler(event) {
     }
 }
 
-
-
 //Takes a value and moves it towards the desired ammount
 //while not wrapping over. Works both with negative and positive
 function Approach(currentValue, desiredValue, ammount ) {
@@ -188,4 +265,22 @@ function Approach(currentValue, desiredValue, ammount ) {
     return currentValue
 }
 
+function intersect(x1,y1,x2,y2,x3,y3,x4,y4){
+    s1x = x2 - x1;
+    s1y = y2 - y1;
 
+    s2x = x4 - x3;
+    s2y = y4 - y3;
+
+    s1 = ((-s1y * (x1 - x3)) + (s1x * (y1 - y3))) / ((-s2x * s1y) + (s1x * s2y))
+    s2 = (( s2x * (y1 - y3)) - (s2y * (x1 - x3))) / ((-s2x * s1y) + (s1x * s2y))
+
+    if ((s1 >= 0)*(s1 <= 1)*(s2 >= 0)*(s2 <= 1))
+    {
+        return [(x1 + (s2*s1x)),(y1 + (s2*s1y))];
+    }
+    else 
+    {
+        return null;;
+    }
+}
