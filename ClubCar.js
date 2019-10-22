@@ -129,14 +129,15 @@ class Car {
         //applyX = speedX*Math.sin(colAng)
         //applyY = speedY*Math.cos(colAng)
 
+
         var tspeedx = this.speedX
         var tspeedy = this.speedY
         
-        this.speedX += 0.5*car.speedX - 1.4*tspeedx
-        this.speedY += 0.5*car.speedY - 1.4*tspeedy
+        this.speedX += 0.5*car.speedX - 0.6*tspeedx
+        this.speedY += 0.5*car.speedY - 0.6*tspeedy
 
-        car.speedX += 0.5*tspeedx
-        car.speedY += 0.5*tspeedy
+        car.speedX += 0.6*tspeedx - 0.5*car.speedX
+        car.speedY += 0.6*tspeedy - 0.5*car.speedY
     }
 
     test(){
@@ -217,8 +218,8 @@ function draw() {
     player.drawCar(otherCar,context);
     player.drawSelf(context);
 
-    otherCar.calculateSpeed(0,0);
     player.calculateSpeed(mod,angleMod);
+    otherCar.calculateSpeed(0,0);
 
     player.checkCarCollison();
 }
