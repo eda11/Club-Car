@@ -30,6 +30,8 @@ window.addEventListener("keyup", keyup_handler, false);
 var ctx = canvas.getContext('2d');
 ctx.fillStyle = '#f00';
 
+
+
 class Car {
     constructor(x, y, angle, image) {
         this.startx = x;
@@ -207,7 +209,7 @@ class Car {
 
     drawSelf(context) {
         context.save();
-        context.translate(800, 400);
+        context.translate(900, 450);
         context.rotate(this.angle);
         context.drawImage(this.img, 10-(this.img.width), 10-(this.img.height));
         context.restore();
@@ -215,7 +217,7 @@ class Car {
 
     drawCar(car,context){
         context.save();
-        context.translate(car.x-(this.x-800), car.y-(this.y-400));
+        context.translate(car.x-(this.x-900), car.y-(this.y-450));
         context.rotate(car.angle);
         context.drawImage(car.img, 10-(car.img.width), 10-(car.img.height));
         context.restore();
@@ -223,7 +225,7 @@ class Car {
 
     drawOther(image,imageAngle,imageX,imageY,offSetX,offSetY,context){
         context.save();
-        context.translate(imageX-(this.x-800), imageY-(this.y-400));
+        context.translate(imageX-(this.x-900), imageY-(this.y-450));
         context.rotate(imageAngle);
         context.drawImage(image,offSetX,offSetY);
         context.restore();
@@ -253,7 +255,7 @@ class Car {
     }
 }
 
-var player = new Car(800,400,20,"Sprites/CarTest.png");
+var player = new Car(900,450,20,"Sprites/CarTest.png");
 var otherCar = new Car(800,600,1,"Sprites/CarTest.png");
 player.addCar(otherCar);
 otherCar.addCar(player);
@@ -272,12 +274,12 @@ function off() {
 
 function draw() {
     context = canvas.getContext("2d");
-    context.clearRect(0, 0, 1600, 1600);   
+    context.clearRect(0, 0, 1800, 900);   
 
     player.drawOther(background,0,0,0,0,0,context);
 
     context.save();
-    context.translate(-(player.x-800), -(player.y-400));
+    context.translate(-(player.x-900), -(player.y-450));
     context.rotate(0);
     context.fillRect(200,200,300,300); 
     context.restore();
