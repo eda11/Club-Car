@@ -38,7 +38,7 @@ class Car {
         this.x = x;
         this.y = y;
         
-        this.friction = 0.2;
+        this.friction = 0.3;
         this.accelaration = 0.4;
         this.maxSpeed = 6;
 
@@ -128,16 +128,28 @@ class Car {
         //colAng = Math.atan(y/x)
         //applyX = speedX*Math.sin(colAng)
         //applyY = speedY*Math.cos(colAng)
+        this.x -= this.speedX;
+        this.y -= this.speedY;
+        car.x -= car.speedX;
+        car.y -= car.speedY;
 
+        var dx = car.x - this.x;
+        var dy = car.y - this.y;
+        var vx = car.speedX - this.speedX;
+        var vy = car.speedY - this.speedY;
+        var dvdr = dx*vx + dy*vy;
+        var dist = 20
 
-        var tspeedx = this.speedX
-        var tspeedy = this.speedY
+        var mag = ((2*1*1*dvdr)/((1+1)*dist))*0.5;
+
+        var fx = (mag * dx)/dist;
+        var fy = (mag * dy)/dist;
         
-        this.speedX += 0.5*car.speedX - 0.6*tspeedx
-        this.speedY += 0.5*car.speedY - 0.6*tspeedy
+        this.speedX += fx;
+        this.speedY += fy;
 
-        car.speedX += 0.6*tspeedx - 0.5*car.speedX
-        car.speedY += 0.6*tspeedy - 0.5*car.speedY
+        car.speedX -= fx;
+        car.speedY -= fy;
     }
 
     test(){
@@ -207,9 +219,6 @@ function off() {
 function draw() {
     context = canvas.getContext("2d");
     context.clearRect(0, 0, 1600, 1600);
-
-    //player.test();
-    player.test();
     
 
     angle += 0.01
