@@ -68,17 +68,17 @@ class Car {
     }
 
     updateCorners(){
-        this.c1x = Math.round((Math.cos(this.angle)*(10)) - (Math.sin(this.angle)*(10)) + this.x);
-        this.c1y = Math.round((Math.sin(this.angle)*(10)) + (Math.cos(this.angle)*(10)) + this.y);
+        this.c1x = (Math.cos(this.angle)*(10)) - (Math.sin(this.angle)*(10)) + this.x;
+        this.c1y = (Math.sin(this.angle)*(10)) + (Math.cos(this.angle)*(10)) + this.y;
 
-        this.c2x = Math.round((Math.cos(this.angle)*(-30)) - (Math.sin(this.angle)*(10)) + this.x);
-        this.c2y = Math.round((Math.sin(this.angle)*(-30)) + (Math.cos(this.angle)*(10)) + this.y);
+        this.c2x = (Math.cos(this.angle)*(-30)) - (Math.sin(this.angle)*(10)) + this.x;
+        this.c2y = (Math.sin(this.angle)*(-30)) + (Math.cos(this.angle)*(10)) + this.y;
 
-        this.c3x = Math.round((Math.cos(this.angle)*(-30)) - (Math.sin(this.angle)*(-10)) + this.x);
-        this.c3y = Math.round((Math.sin(this.angle)*(-30)) + (Math.cos(this.angle)*(-10)) + this.y);
+        this.c3x = (Math.cos(this.angle)*(-30)) - (Math.sin(this.angle)*(-10)) + this.x;
+        this.c3y = (Math.sin(this.angle)*(-30)) + (Math.cos(this.angle)*(-10)) + this.y;
 
-        this.c4x = Math.round((Math.cos(this.angle)*(10)) - (Math.sin(this.angle)*(-10)) + this.x);
-        this.c4y = Math.round((Math.sin(this.angle)*(10)) + (Math.cos(this.angle)*(-10)) + this.y);
+        this.c4x = (Math.cos(this.angle)*(10)) - (Math.sin(this.angle)*(-10)) + this.x;
+        this.c4y = (Math.sin(this.angle)*(10)) + (Math.cos(this.angle)*(-10)) + this.y;
     }
 
     addCar(car){
@@ -123,15 +123,13 @@ class Car {
     }
 
     carCollide(coor,car){
-        x = coor[0];
-        y = coor[1];
-        //colAng = Math.atan(y/x)
-        //applyX = speedX*Math.sin(colAng)
-        //applyY = speedY*Math.cos(colAng)
-        this.x -= this.speedX;
-        this.y -= this.speedY;
-        car.x -= car.speedX;
-        car.y -= car.speedY;
+        var x = coor[0];
+        var y = coor[1];
+
+        this.x -= 3*this.speedX;
+        this.y -= 3*this.speedY;
+        car.x -= 3*car.speedX;
+        car.y -= 3*car.speedY;
 
         var dx = car.x - this.x;
         var dy = car.y - this.y;
@@ -140,16 +138,34 @@ class Car {
         var dvdr = dx*vx + dy*vy;
         var dist = 20
 
-        var mag = ((2*1*1*dvdr)/((1+1)*dist))*0.5;
+        var mag = ((2*1*1*dvdr)/((1+1)*dist))*0.3;
 
         var fx = (mag * dx)/dist;
         var fy = (mag * dy)/dist;
+        var force = (Math.sqrt((fx*fx)+(fy*fy)))*0.015
+
+
         
         this.speedX += fx;
         this.speedY += fy;
 
+        var c1 = (Math.cos(-this.angle)*(x-this.x)) - (Math.sin(-this.angle)*(y-this.y+10)) > 0
+        var c2 = (Math.sin(-this.angle)*(x-this.x)) + (Math.cos(-this.angle)*(y-this.y+10)) > 0
+
+        if (c1 == c2)
+        {this.angleSpeed -= force;}
+        else {this.angleSpeed += force;}
+
         car.speedX -= fx;
         car.speedY -= fy;
+
+        var c1 = (Math.cos(-car.angle)*(x-car.x)) - (Math.sin(-car.angle)*(y-car.y+10)) > 0
+        var c2 = (Math.sin(-car.angle)*(x-car.x)) + (Math.cos(-car.angle)*(y-car.y+10)) > 0
+
+        if (c1 == c2)
+        {car.angleSpeed -= force;}
+        else {car.angleSpeed += force;}
+
     }
 
     test(){
@@ -192,15 +208,17 @@ class Car {
         this.speedY = Approach(this.speedY, 0, this.friction*Math.abs(this.speedY/this.maxSpeed));
 
         this.angle += this.angleSpeed;
-        this.x += this.speedX;
-        this.y += this.speedY;
+        if (this.angle > 2*Math.PI){this.angle -= 2*Math.PI}
+        if (this.angle < 0){this.angle += 2*Math.PI}
+        this.x += (this.speedX);
+        this.y += (this.speedY);
 
         this.updateCorners();
     }
 }
 
 var player = new Car(800,800,20,"Sprites/CarTest.png");
-var otherCar = new Car(800,600,20,"Sprites/CarTest.png");
+var otherCar = new Car(800,600,1,"Sprites/CarTest.png");
 player.addCar(otherCar);
 otherCar.addCar(player);
 
