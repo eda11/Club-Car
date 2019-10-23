@@ -191,10 +191,10 @@ class Car {
         this.y -= 3*this.speedY;
         this.angle -= 3*this.angleSpeed;
 
-        this.speedX = -0.4*this.speedX;
-        this.speedY = -0.4*this.speedY;
+        this.speedX = -0.9*this.speedX;
+        this.speedY = -0.9*this.speedY;
 
-        var force = 1*0.015
+        var force = 4*0.015
 
         var c1 = (Math.cos(-this.angle)*(x-this.x)) - (Math.sin(-this.angle)*(y-this.y+10)) > 0
         var c2 = (Math.sin(-this.angle)*(x-this.x)) + (Math.cos(-this.angle)*(y-this.y+10)) > 0
@@ -247,6 +247,7 @@ class Car {
         this.y += (this.speedY);
 
         this.checkObjectCollison(0,0,0,2000,2000,2000,2000,0)
+        this.checkObjectCollison(200,200,200,500,500,500,500,200)
 
         this.updateCorners();
     }
@@ -271,12 +272,16 @@ function off() {
 
 function draw() {
     context = canvas.getContext("2d");
-    context.clearRect(0, 0, 1600, 1600);
-    
-
-    angle += 0.01
+    context.clearRect(0, 0, 1600, 1600);   
 
     player.drawOther(background,0,0,0,0,0,context);
+
+    context.save();
+    context.translate(-(player.x-800), -(player.y-400));
+    context.rotate(0);
+    context.fillRect(200,200,300,300); 
+    context.restore();
+
     player.drawCar(otherCar,context);
     player.drawSelf(context);
 
