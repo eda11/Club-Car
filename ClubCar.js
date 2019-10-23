@@ -89,13 +89,13 @@ class Car {
         if (!(null == intersect(x1,y1,x2,y2,car.c1x,car.c1y,car.c2x,car.c2y))){
             return intersect(x1,y1,x2,y2,car.c1x,car.c1y,car.c2x,car.c2y);
         }
-        if (!(null == intersect(x1,y1,x2,y2,car.c2x,car.c2y,car.c3x,car.c3y))){
+        else if (!(null == intersect(x1,y1,x2,y2,car.c2x,car.c2y,car.c3x,car.c3y))){
             return intersect(x1,y1,x2,y2,car.c2x,car.c2y,car.c3x,car.c3y);
         }
-        if (!(null == intersect(x1,y1,x2,y2,car.c3x,car.c3y,car.c4x,car.c4y))){
+        else if (!(null == intersect(x1,y1,x2,y2,car.c3x,car.c3y,car.c4x,car.c4y))){
             return intersect(x1,y1,x2,y2,car.c3x,car.c3y,car.c4x,car.c4y);
         }
-        if (!(null == intersect(x1,y1,x2,y2,car.c4x,car.c4y,car.c1x,car.c1y))){
+        else if (!(null == intersect(x1,y1,x2,y2,car.c4x,car.c4y,car.c1x,car.c1y))){
             return intersect(x1,y1,x2,y2,car.c3x,car.c3y,car.c4x,car.c4y);
         }
         return null;
@@ -167,9 +167,41 @@ class Car {
         else {car.angleSpeed += force;}
 
     }
+    checkObjectCollison(x1,y1,x2,y2,x3,y3,x4,y4){
+        if (!(null == this.lineCrossesCar(x1,y1,x2,y2,this))){
+            this.objectCollide(this.lineCrossesCar(x1,y1,x2,y2,this));
+        }
+        else if (!(null == this.lineCrossesCar(x2,y2,x3,y3,this))){
+            this.objectCollide(this.lineCrossesCar(x2,y2,x3,y3,this));
+        }
+        else if (!(null == this.lineCrossesCar(x3,y3,x4,y4,this))){
+            this.objectCollide(this.lineCrossesCar(x3,y3,x4,y4,this));
+        }
+        else if (!(null == this.lineCrossesCar(x4,y4,x1,y1,this))){
+            this.objectCollide(this.lineCrossesCar(x4,y4,x1,y1,this));
+        }
 
-    test(){
-        console.log(this.checkCarCollison());
+    }
+
+    objectCollide(coor){
+        var x = coor[0];
+        var y = coor[1];
+
+        this.x -= 3*this.speedX;
+        this.y -= 3*this.speedY;
+
+        this.speedX = -0.4*this.speedX;
+        this.speedY = -0.4*this.speedY;
+
+        var c1 = (Math.cos(-this.angle)*(x-this.x)) - (Math.sin(-this.angle)*(y-this.y+10)) > 0
+        var c2 = (Math.sin(-this.angle)*(x-this.x)) + (Math.cos(-this.angle)*(y-this.y+10)) > 0
+
+        if (c1 == c2)
+        {this.angleSpeed = -0.02;}
+        else {this.angleSpeed = 0.02;}
+
+        console.log(Collide,speedX,speedY)
+
     }
 
     drawSelf(context) {
@@ -213,11 +245,16 @@ class Car {
         this.x += (this.speedX);
         this.y += (this.speedY);
 
+        if ((this.x < 0)| (this.x > 2000)){this.speedX = -this.speedX}
+        if ((this.y < 0)| (this.y > 2000)){this.speedY = -this.speedY}
+
+        this.checkObjectCollison(0,0,0,2000,2000,2000,2000,0)
+
         this.updateCorners();
     }
 }
 
-var player = new Car(800,800,20,"Sprites/CarTest.png");
+var player = new Car(800,400,20,"Sprites/CarTest.png");
 var otherCar = new Car(800,600,1,"Sprites/CarTest.png");
 player.addCar(otherCar);
 otherCar.addCar(player);
