@@ -190,8 +190,8 @@ class Car {
         this.x -= 3*this.speedX;
         this.y -= 3*this.speedY;
 
-        this.speedX = -0.4*this.speedX;
-        this.speedY = -0.4*this.speedY;
+        this.speedX = -this.speedX;
+        this.speedY = -this.speedY;
 
         var c1 = (Math.cos(-this.angle)*(x-this.x)) - (Math.sin(-this.angle)*(y-this.y+10)) > 0
         var c2 = (Math.sin(-this.angle)*(x-this.x)) + (Math.cos(-this.angle)*(y-this.y+10)) > 0
@@ -199,8 +199,6 @@ class Car {
         if (c1 == c2)
         {this.angleSpeed = -0.02;}
         else {this.angleSpeed = 0.02;}
-
-        console.log(Collide,speedX,speedY)
 
     }
 
@@ -249,6 +247,7 @@ class Car {
         if ((this.y < 0)| (this.y > 2000)){this.speedY = -this.speedY}
 
         this.checkObjectCollison(0,0,0,2000,2000,2000,2000,0)
+        console.log(this.angleSpeed)
 
         this.updateCorners();
     }
