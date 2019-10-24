@@ -1,10 +1,17 @@
 #gameSpace {
   border: 2px solid #333;
   position: relative;
-  width: 90%;
-  height: 90%;
-  align: center;
-  
+  height: 85%;
+  width: auto;
+  text-align: center;
+  margin: auto;
+}
+canvas {
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
 }
 
 html, body{
@@ -32,7 +39,7 @@ body{
   position: absolute;
   top: 50%;
   left: 50%;
-  font-size: 50px;
+  font-size: 30px;
   color: red;
   transform: translate(-50%,-50%);
   -ms-transform: translate(-50%,-50%);
@@ -56,7 +63,7 @@ h1{
    /* Font options */
   font-family: 'Pacifico', cursive;
   text-shadow: 2px 2px 4px #000000;
-  font-size:40px;
+  font-size:30px;
   
    /* Chrome, Safari, Opera */
   -webkit-animation: rainbow 5s infinite; 
@@ -115,7 +122,7 @@ h1{
 
 .container{
   background-color:#E0F2F1;
-  padding:10px;
-  border-radius:15px;
-  box-shadow: 10px 10px 20px 0px rgba(0,0,0,0.75);
+  padding:2px;
+  border-radius: 3px;
+  box-shadow: 1px 1px 2px 0px rgba(0,0,0,0.75);
 }

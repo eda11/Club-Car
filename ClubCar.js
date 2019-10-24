@@ -30,6 +30,8 @@ window.addEventListener("keyup", keyup_handler, false);
 var ctx = canvas.getContext('2d');
 ctx.fillStyle = '#f00';
 
+
+
 class Car {
     constructor(x, y, angle, image) {
         this.startx = x;
@@ -38,7 +40,7 @@ class Car {
         this.x = x;
         this.y = y;
         
-        this.friction = 0.2;
+        this.friction = 0.3;
         this.accelaration = 0.4;
         this.maxSpeed = 6;
 
@@ -68,17 +70,17 @@ class Car {
     }
 
     updateCorners(){
-        this.c1x = Math.round((Math.cos(this.angle)*(10)) - (Math.sin(this.angle)*(10)) + this.x);
-        this.c1y = Math.round((Math.sin(this.angle)*(10)) + (Math.cos(this.angle)*(10)) + this.y);
+        this.c1x = (Math.cos(this.angle)*(10)) - (Math.sin(this.angle)*(10)) + this.x;
+        this.c1y = (Math.sin(this.angle)*(10)) + (Math.cos(this.angle)*(10)) + this.y;
 
-        this.c2x = Math.round((Math.cos(this.angle)*(-30)) - (Math.sin(this.angle)*(10)) + this.x);
-        this.c2y = Math.round((Math.sin(this.angle)*(-30)) + (Math.cos(this.angle)*(10)) + this.y);
+        this.c2x = (Math.cos(this.angle)*(-30)) - (Math.sin(this.angle)*(10)) + this.x;
+        this.c2y = (Math.sin(this.angle)*(-30)) + (Math.cos(this.angle)*(10)) + this.y;
 
-        this.c3x = Math.round((Math.cos(this.angle)*(-30)) - (Math.sin(this.angle)*(-10)) + this.x);
-        this.c3y = Math.round((Math.sin(this.angle)*(-30)) + (Math.cos(this.angle)*(-10)) + this.y);
+        this.c3x = (Math.cos(this.angle)*(-30)) - (Math.sin(this.angle)*(-10)) + this.x;
+        this.c3y = (Math.sin(this.angle)*(-30)) + (Math.cos(this.angle)*(-10)) + this.y;
 
-        this.c4x = Math.round((Math.cos(this.angle)*(10)) - (Math.sin(this.angle)*(-10)) + this.x);
-        this.c4y = Math.round((Math.sin(this.angle)*(10)) + (Math.cos(this.angle)*(-10)) + this.y);
+        this.c4x = (Math.cos(this.angle)*(10)) - (Math.sin(this.angle)*(-10)) + this.x;
+        this.c4y = (Math.sin(this.angle)*(10)) + (Math.cos(this.angle)*(-10)) + this.y;
     }
 
     addCar(car){
@@ -89,13 +91,13 @@ class Car {
         if (!(null == intersect(x1,y1,x2,y2,car.c1x,car.c1y,car.c2x,car.c2y))){
             return intersect(x1,y1,x2,y2,car.c1x,car.c1y,car.c2x,car.c2y);
         }
-        if (!(null == intersect(x1,y1,x2,y2,car.c2x,car.c2y,car.c3x,car.c3y))){
+        else if (!(null == intersect(x1,y1,x2,y2,car.c2x,car.c2y,car.c3x,car.c3y))){
             return intersect(x1,y1,x2,y2,car.c2x,car.c2y,car.c3x,car.c3y);
         }
-        if (!(null == intersect(x1,y1,x2,y2,car.c3x,car.c3y,car.c4x,car.c4y))){
+        else if (!(null == intersect(x1,y1,x2,y2,car.c3x,car.c3y,car.c4x,car.c4y))){
             return intersect(x1,y1,x2,y2,car.c3x,car.c3y,car.c4x,car.c4y);
         }
-        if (!(null == intersect(x1,y1,x2,y2,car.c4x,car.c4y,car.c1x,car.c1y))){
+        else if (!(null == intersect(x1,y1,x2,y2,car.c4x,car.c4y,car.c1x,car.c1y))){
             return intersect(x1,y1,x2,y2,car.c3x,car.c3y,car.c4x,car.c4y);
         }
         return null;
@@ -123,29 +125,91 @@ class Car {
     }
 
     carCollide(coor,car){
-        x = coor[0];
-        y = coor[1];
-        //colAng = Math.atan(y/x)
-        //applyX = speedX*Math.sin(colAng)
-        //applyY = speedY*Math.cos(colAng)
+        var x = coor[0];
+        var y = coor[1];
 
-        var tspeedx = this.speedX
-        var tspeedy = this.speedY
+        this.x -= 3*this.speedX;
+        this.y -= 3*this.speedY;
+        car.x -= 3*car.speedX;
+        car.y -= 3*car.speedY;
+
+        var dx = car.x - this.x;
+        var dy = car.y - this.y;
+        var vx = car.speedX - this.speedX;
+        var vy = car.speedY - this.speedY;
+        var dvdr = dx*vx + dy*vy;
+        var dist = 20
+
+        var mag = ((2*1*1*dvdr)/((1+1)*dist))*0.3;
+
+        var fx = (mag * dx)/dist;
+        var fy = (mag * dy)/dist;
+        var force = (Math.sqrt((fx*fx)+(fy*fy)))*0.015
+
+
         
-        this.speedX += 0.5*car.speedX - 1.4*tspeedx
-        this.speedY += 0.5*car.speedY - 1.4*tspeedy
+        this.speedX += fx;
+        this.speedY += fy;
 
-        car.speedX += 0.5*tspeedx
-        car.speedY += 0.5*tspeedy
+        var c1 = (Math.cos(-this.angle)*(x-this.x)) - (Math.sin(-this.angle)*(y-this.y+10)) > 0
+        var c2 = (Math.sin(-this.angle)*(x-this.x)) + (Math.cos(-this.angle)*(y-this.y+10)) > 0
+
+        if (c1 == c2)
+        {this.angleSpeed -= force;}
+        else {this.angleSpeed += force;}
+
+        car.speedX -= fx;
+        car.speedY -= fy;
+
+        var c1 = (Math.cos(-car.angle)*(x-car.x)) - (Math.sin(-car.angle)*(y-car.y+10)) > 0
+        var c2 = (Math.sin(-car.angle)*(x-car.x)) + (Math.cos(-car.angle)*(y-car.y+10)) > 0
+
+        if (c1 == c2)
+        {car.angleSpeed -= force;}
+        else {car.angleSpeed += force;}
+
+    }
+    checkObjectCollison(x1,y1,x2,y2,x3,y3,x4,y4){
+        if (!(null == this.lineCrossesCar(x1,y1,x2,y2,this))){
+            this.objectCollide(this.lineCrossesCar(x1,y1,x2,y2,this));
+        }
+        else if (!(null == this.lineCrossesCar(x2,y2,x3,y3,this))){
+            this.objectCollide(this.lineCrossesCar(x2,y2,x3,y3,this));
+        }
+        else if (!(null == this.lineCrossesCar(x3,y3,x4,y4,this))){
+            this.objectCollide(this.lineCrossesCar(x3,y3,x4,y4,this));
+        }
+        else if (!(null == this.lineCrossesCar(x4,y4,x1,y1,this))){
+            this.objectCollide(this.lineCrossesCar(x4,y4,x1,y1,this));
+        }
+
     }
 
-    test(){
-        console.log(this.checkCarCollison());
+    objectCollide(coor){
+        var x = coor[0];
+        var y = coor[1];
+
+        this.x -= 3*this.speedX;
+        this.y -= 3*this.speedY;
+        this.angle -= 3*this.angleSpeed;
+
+        this.speedX = -0.9*this.speedX;
+        this.speedY = -0.9*this.speedY;
+
+        var force = 4*0.015
+
+        var c1 = (Math.cos(-this.angle)*(x-this.x)) - (Math.sin(-this.angle)*(y-this.y+10)) > 0
+        var c2 = (Math.sin(-this.angle)*(x-this.x)) + (Math.cos(-this.angle)*(y-this.y+10)) > 0
+
+        if (c1 == c2)
+        {this.angleSpeed -= force;}
+        else {this.angleSpeed += force;}
+
     }
 
     drawSelf(context) {
         context.save();
-        context.translate(800, 400);
+        context.translate(900, 450);
         context.rotate(this.angle);
         context.drawImage(this.img, 10-(this.img.width), 10-(this.img.height));
         context.restore();
@@ -153,7 +217,7 @@ class Car {
 
     drawCar(car,context){
         context.save();
-        context.translate(car.x-(this.x-800), car.y-(this.y-400));
+        context.translate(car.x-(this.x-900), car.y-(this.y-450));
         context.rotate(car.angle);
         context.drawImage(car.img, 10-(car.img.width), 10-(car.img.height));
         context.restore();
@@ -161,7 +225,7 @@ class Car {
 
     drawOther(image,imageAngle,imageX,imageY,offSetX,offSetY,context){
         context.save();
-        context.translate(imageX-(this.x-800), imageY-(this.y-400));
+        context.translate(imageX-(this.x-900), imageY-(this.y-450));
         context.rotate(imageAngle);
         context.drawImage(image,offSetX,offSetY);
         context.restore();
@@ -179,15 +243,20 @@ class Car {
         this.speedY = Approach(this.speedY, 0, this.friction*Math.abs(this.speedY/this.maxSpeed));
 
         this.angle += this.angleSpeed;
-        this.x += this.speedX;
-        this.y += this.speedY;
+        if (this.angle > 2*Math.PI){this.angle -= 2*Math.PI}
+        if (this.angle < 0){this.angle += 2*Math.PI}
+        this.x += (this.speedX);
+        this.y += (this.speedY);
+
+        this.checkObjectCollison(0,0,0,2000,2000,2000,2000,0)
+        this.checkObjectCollison(200,200,200,500,500,500,500,200)
 
         this.updateCorners();
     }
 }
 
-var player = new Car(800,800,20,"Sprites/CarTest.png");
-var otherCar = new Car(800,600,20,"Sprites/CarTest.png");
+var player = new Car(900,450,20,"Sprites/CarTest.png");
+var otherCar = new Car(800,600,1,"Sprites/CarTest.png");
 player.addCar(otherCar);
 otherCar.addCar(player);
 
@@ -205,20 +274,21 @@ function off() {
 
 function draw() {
     context = canvas.getContext("2d");
-    context.clearRect(0, 0, 1600, 1600);
-
-    //player.test();
-    player.test();
-    
-
-    angle += 0.01
+    context.clearRect(0, 0, 1800, 900);   
 
     player.drawOther(background,0,0,0,0,0,context);
+
+    context.save();
+    context.translate(-(player.x-900), -(player.y-450));
+    context.rotate(0);
+    context.fillRect(200,200,300,300); 
+    context.restore();
+
     player.drawCar(otherCar,context);
     player.drawSelf(context);
 
-    otherCar.calculateSpeed(0,0);
     player.calculateSpeed(mod,angleMod);
+    otherCar.calculateSpeed(0,0);
 
     player.checkCarCollison();
 }
