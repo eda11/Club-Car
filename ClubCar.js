@@ -48,6 +48,9 @@ class Car {
         this.speedY = 0;
         this.angleSpeed = 0;
 
+        this.tempSpeedX = 0;
+        this.tempSpeedY = 0;
+
         this.angle = angle;
         this.img = new Image();
         this.img.src = image;
@@ -63,6 +66,12 @@ class Car {
 
         this.c4x = 0;
         this.c4y = 0;
+
+        this.collide = false;
+
+        this.collisionX = 0;
+        this.collisionY = 0;
+        this.collisionAngle = 0;
 
         this.updateCorners();
 
@@ -106,32 +115,31 @@ class Car {
     checkCarCollison(){
         for (let i = 0; i < this.otherCars.length; i++){
             if (!(null == this.lineCrossesCar(this.c1x,this.c1y,this.c2x,this.c2y,this.otherCars[i]))){
-                this.carCollide(this.lineCrossesCar(this.c1x,this.c1y,this.c2x,this.c2y,this.otherCars[i]),this.otherCars[i]);
+                this.carCollide(this.lineCrossesCar(this.c1x,this.c1y,this.c2x,this.c2y,this.otherCars[i]),this.otherCars[i],true);
                 break;
             }
             if (!(null == this.lineCrossesCar(this.c2x,this.c2y,this.c3x,this.c3y,this.otherCars[i]))){
-                this.carCollide(this.lineCrossesCar(this.c2x,this.c2y,this.c3x,this.c3y,this.otherCars[i]),this.otherCars[i]);
+                this.carCollide(this.lineCrossesCar(this.c2x,this.c2y,this.c3x,this.c3y,this.otherCars[i]),this.otherCars[i],true);
                 break;
             }
             if (!(null == this.lineCrossesCar(this.c3x,this.c3y,this.c4x,this.c4y,this.otherCars[i]))){
-                this.carCollide(this.lineCrossesCar(this.c3x,this.c3y,this.c4x,this.c4y,this.otherCars[i]),this.otherCars[i]);
+                this.carCollide(this.lineCrossesCar(this.c3x,this.c3y,this.c4x,this.c4y,this.otherCars[i]),this.otherCars[i],true);
                 break;
             }
             if (!(null == this.lineCrossesCar(this.c4x,this.c4y,this.c1x,this.c1y,this.otherCars[i]))){
-                this.carCollide(this.lineCrossesCar(this.c4x,this.c4y,this.c1x,this.c1y,this.otherCars[i]),this.otherCars[i]);
+                this.carCollide(this.lineCrossesCar(this.c4x,this.c4y,this.c1x,this.c1y,this.otherCars[i]),this.otherCars[i],true);
                 break;
             }
         }
     }
 
-    carCollide(coor,car){
+    carCollide(coor,car,first){
         var x = coor[0];
         var y = coor[1];
 
-        this.x -= 3*this.speedX;
-        this.y -= 3*this.speedY;
-        car.x -= 3*car.speedX;
-        car.y -= 3*car.speedY;
+        if (first) {car.carCollide(coor,this,false)};
+
+        this.collide = true;
 
         var dx = car.x - this.x;
         var dy = car.y - this.y;
@@ -140,34 +148,30 @@ class Car {
         var dvdr = dx*vx + dy*vy;
         var dist = 20
 
-        var mag = ((2*1*1*dvdr)/((1+1)*dist))*0.3;
+        var mag = ((2*1*1*dvdr)/((1+1)*dist))*0.5;
 
         var fx = (mag * dx)/dist;
         var fy = (mag * dy)/dist;
         var force = (Math.sqrt((fx*fx)+(fy*fy)))*0.015
-
-
         
-        this.speedX += fx;
-        this.speedY += fy;
+        this.collisionX = fx;
+        this.collisionY = fy;
 
         var c1 = (Math.cos(-this.angle)*(x-this.x)) - (Math.sin(-this.angle)*(y-this.y+10)) > 0
         var c2 = (Math.sin(-this.angle)*(x-this.x)) + (Math.cos(-this.angle)*(y-this.y+10)) > 0
 
         if (c1 == c2)
-        {this.angleSpeed -= force;}
-        else {this.angleSpeed += force;}
+        {this.collisionAngle = force*-1;}
+        else {this.collisionAngle = force;}
+    }
 
-        car.speedX -= fx;
-        car.speedY -= fy;
+    carCollideCalc(){
+        this.x -= 3*this.speedX;
+        this.y -= 3*this.speedY;
 
-        var c1 = (Math.cos(-car.angle)*(x-car.x)) - (Math.sin(-car.angle)*(y-car.y+10)) > 0
-        var c2 = (Math.sin(-car.angle)*(x-car.x)) + (Math.cos(-car.angle)*(y-car.y+10)) > 0
-
-        if (c1 == c2)
-        {car.angleSpeed -= force;}
-        else {car.angleSpeed += force;}
-
+        this.speedX += this.collisionX;
+        this.speedY += this.collisionY;
+        this.angleSpeed += this.collisionAngle;
     }
     checkObjectCollison(x1,y1,x2,y2,x3,y3,x4,y4){
         if (!(null == this.lineCrossesCar(x1,y1,x2,y2,this))){
@@ -232,6 +236,14 @@ class Car {
     }
 
     calculateSpeed(speedMod,angleMod){
+
+        if (this.collide){
+            this.carCollideCalc()
+            console.log("Collide")
+            this.collide = false;
+            
+        }
+
         //Increase the speed in the correct direction
         this.angleSpeed += angleMod*0.005;
         this.speedX += this.accelaration*Math.cos(this.angle)*speedMod; 
@@ -257,8 +269,46 @@ class Car {
 
 var player = new Car(900,450,20,"Sprites/CarTest.png");
 var otherCar = new Car(800,600,1,"Sprites/CarTest.png");
+var hey = new Car(600,600,1,"Sprites/CarTest.png");
+var there = new Car(600,800,1,"Sprites/CarTest.png");
+var ocaml = new Car(700,700,1,"Sprites/CarTest.png");
+var best = new Car(800,800,1,"Sprites/CarTest.png");
+
 player.addCar(otherCar);
+player.addCar(hey);
+player.addCar(there);
+player.addCar(ocaml);
+player.addCar(best);
+
 otherCar.addCar(player);
+otherCar.addCar(hey);
+otherCar.addCar(there);
+otherCar.addCar(ocaml);
+otherCar.addCar(best);
+
+hey.addCar(player);
+hey.addCar(otherCar);
+hey.addCar(there);
+hey.addCar(ocaml);
+hey.addCar(best);
+
+there.addCar(player);
+there.addCar(otherCar);
+there.addCar(hey);
+there.addCar(ocaml);
+there.addCar(best);
+
+ocaml.addCar(player);
+ocaml.addCar(otherCar);
+ocaml.addCar(hey);
+ocaml.addCar(there);
+ocaml.addCar(best);
+
+best.addCar(player);
+best.addCar(otherCar);
+best.addCar(hey);
+best.addCar(there);
+best.addCar(ocaml);
 
 var moveInterval = setInterval(function () {
     draw();
@@ -285,12 +335,25 @@ function draw() {
     context.restore();
 
     player.drawCar(otherCar,context);
+    player.drawCar(hey,context);
+    player.drawCar(there,context);
+    player.drawCar(ocaml,context);
+    player.drawCar(best,context);
     player.drawSelf(context);
+
+    player.checkCarCollison();
+    otherCar.checkCarCollison();
+    hey.checkCarCollison();
+    there.checkCarCollison();
+    ocaml.checkCarCollison();
+    best.checkCarCollison();
 
     player.calculateSpeed(mod,angleMod);
     otherCar.calculateSpeed(0,0);
-
-    player.checkCarCollison();
+    hey.calculateSpeed(0,0);
+    there.calculateSpeed(0,0);
+    ocaml.calculateSpeed(0,0);
+    best.calculateSpeed(0,0);
 }
 
 function keyup_handler(event) {
