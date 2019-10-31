@@ -34,6 +34,7 @@ ctx.fillStyle = '#f00';
 
 class Car {
     constructor(x, y, angle, image) {
+        //Initialise car at the x and y coordinates
         this.startx = x;
         this.starty = y;
 
@@ -267,6 +268,7 @@ class Car {
     }
 }
 
+//Set up test cars
 var player = new Car(900,450,20,"Sprites/CarTest.png");
 var otherCar = new Car(800,600,1,"Sprites/CarTest.png");
 var hey = new Car(600,600,1,"Sprites/CarTest.png");
@@ -357,24 +359,30 @@ function draw() {
 }
 
 function keyup_handler(event) {
+    //W or S (forwards or reverse)
     if (event.keyCode == 87 || event.keyCode == 83) {
         mod = 0;
     }
+    //A or D (turn left or right)
     if (event.keyCode == 65 || event.keyCode == 68) {
         angleMod = 0;
     } 
 }
 
 function keypress_handler(event) {
+    //W (Forwards)
     if (event.keyCode == 87) {
         mod = 1;
     }
+    //S (Reverse)
     if (event.keyCode == 83) {
         mod = -0.6;
     }
+    //A (Turn left)
     if (event.keyCode == 65) {
         angleMod = -1;
     }
+    //D (Turn right)
     if (event.keyCode == 68) {
         angleMod = 1;
     }
