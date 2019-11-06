@@ -1,22 +1,13 @@
+// TODO : Add comments
+
 //The starting position for the car
 startx = 800
 starty = 400
 
+//The width and height of the background
 widthBackground = 2000
 heightBackground = 2000
 
-
-x = startx;
-y = starty;
-accelaration = 0.4;
-maxSpeed = 6;
-speedX = 0;
-speedY = 0;
-friction = 0.2;
-angle = 0;
-angleSpeed = 0;
-mod = 0;
-angleMod = 0;
 canvas = document.getElementById("gameSpace");
 context = canvas.getContext("2d");
 var img = new Image();
@@ -41,10 +32,12 @@ class Car {
         this.x = x;
         this.y = y;
         
+        //Initalise the movement vars
         this.friction = 0.3;
         this.accelaration = 0.4;
         this.maxSpeed = 6;
 
+        //This contains the movement speeds
         this.speedX = 0;
         this.speedY = 0;
         this.angleSpeed = 0;
@@ -52,6 +45,7 @@ class Car {
         this.tempSpeedX = 0;
         this.tempSpeedY = 0;
 
+        //This contains the angle and image of the car
         this.angle = angle;
         this.img = new Image();
         this.img.src = image;
@@ -134,6 +128,7 @@ class Car {
         }
     }
 
+    //This needs to be commented
     carCollide(coor,car,first){
         var x = coor[0];
         var y = coor[1];
@@ -276,6 +271,7 @@ var there = new Car(600,800,1,"Sprites/CarTest.png");
 var ocaml = new Car(700,700,1,"Sprites/CarTest.png");
 var best = new Car(800,800,1,"Sprites/CarTest.png");
 
+//This should be refactored
 player.addCar(otherCar);
 player.addCar(hey);
 player.addCar(there);
@@ -336,6 +332,7 @@ function draw() {
     context.fillRect(200,200,300,300); 
     context.restore();
 
+    //This has to be re-factored
     player.drawCar(otherCar,context);
     player.drawCar(hey,context);
     player.drawCar(there,context);
@@ -406,6 +403,7 @@ function Approach(currentValue, desiredValue, ammount ) {
     return currentValue
 }
 
+//Checks if 2 bounding boxes intersect
 function intersect(x1,y1,x2,y2,x3,y3,x4,y4){
     s1x = x2 - x1;
     s1y = y2 - y1;
