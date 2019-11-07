@@ -1,7 +1,10 @@
+// TODO : Add comments
+
 //The starting position for the car
 startx = 800
 starty = 400
 
+//The width and height of the background
 widthBackground = 2000
 heightBackground = 2000
 
@@ -47,10 +50,12 @@ class Car {
         this.x = x;
         this.y = y;
         
+        //Initalise the movement vars
         this.friction = 0.3;
         this.accelaration = 0.4;
         this.maxSpeed = 6;
 
+        //This contains the movement speeds
         this.speedX = 0;
         this.speedY = 0;
         this.angleSpeed = 0;
@@ -58,6 +63,7 @@ class Car {
         this.tempSpeedX = 0;
         this.tempSpeedY = 0;
 
+        //This contains the angle and image of the car
         this.angle = angle;
         this.img = new Image();
         this.img.src = image;
@@ -145,6 +151,7 @@ class Car {
         }
     }
 
+    //This needs to be commented
     carCollide(coor,car,first){
         var x = coor[0];
         var y = coor[1];
@@ -448,6 +455,7 @@ function Approach(currentValue, desiredValue, ammount ) {
     return currentValue
 }
 
+//Checks if 2 bounding boxes intersect
 function intersect(x1,y1,x2,y2,x3,y3,x4,y4){
     s1x = x2 - x1;
     s1y = y2 - y1;
