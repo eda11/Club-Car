@@ -1,24 +1,17 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <div class="container">
-	<h2 class="rainbow">CLUB CAR</h2>
-
-  
-</div>
+    <div class="container">
+	    <h2 class="rainbow">CLUB CAR</h2> 
+    </div>
     <link rel='stylesheet' type='text/css' href='ClubCar.css'>
-	
-
   </head>
-
+  <script src="/socket.io/socket.io.js"></script>
   <body>
-    <canvas id="gameSpace" width="1800" height="900"  ></canvas>
-    <script src="ClubCar.js"></script>
-	
-	 <div id="overlay" onlick= "off">
-  <div id="text">  </div>
-
-  
-</div>
+    <canvas id="gameSpace" width="1800" height="900"></canvas>
+    <script src="ClubCar.js"></script>    
+	  <div id="overlay" onlick= "off">
+      <div id="text"></div>
+    </div>
   </body>
 </html>
