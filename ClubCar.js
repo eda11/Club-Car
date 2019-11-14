@@ -8,6 +8,20 @@ starty = 400
 widthBackground = 2000
 heightBackground = 2000
 
+var cars = [];
+var playerID = -1;
+
+x = startx;
+y = starty;
+accelaration = 0.4;
+maxSpeed = 6;
+speedX = 0;
+speedY = 0;
+friction = 0.2;
+angle = 0;
+angleSpeed = 0;
+mod = 0;
+angleMod = 0;
 canvas = document.getElementById("gameSpace");
 context = canvas.getContext("2d");
 var img = new Image();
@@ -21,11 +35,15 @@ window.addEventListener("keyup", keyup_handler, false);
 var ctx = canvas.getContext('2d');
 ctx.fillStyle = '#f00';
 
-
+// connect the socket to the server and emit a test
+var socket = io.connect();
+socket.emit("test");
 
 class Car {
-    constructor(x, y, angle, image) {
+    constructor(id , x, y, angle, image) {
         //Initialise car at the x and y coordinates
+        this.id = id;
+
         this.startx = x;
         this.starty = y;
 
@@ -88,7 +106,12 @@ class Car {
     }
 
     addCar(car){
-        this.otherCars.push(car);
+        if (car.id != this.id)
+            this.otherCars.push(car);
+    }
+
+    removeCar(car){
+        delete this.otherCars[car];
     }
 
     lineCrossesCar(x1,y1,x2,y2,car){
@@ -107,7 +130,7 @@ class Car {
         return null;
     }
 
-    checkCarCollison(){
+    checkCarCollision(){
         for (let i = 0; i < this.otherCars.length; i++){
             if (!(null == this.lineCrossesCar(this.c1x,this.c1y,this.c2x,this.c2y,this.otherCars[i]))){
                 this.carCollide(this.lineCrossesCar(this.c1x,this.c1y,this.c2x,this.c2y,this.otherCars[i]),this.otherCars[i],true);
@@ -133,7 +156,7 @@ class Car {
         var x = coor[0];
         var y = coor[1];
 
-        if (first) {car.carCollide(coor,this,false)};
+        //if (first) {car.carCollide(coor,this,false)};
 
         this.collide = true;
 
@@ -144,11 +167,11 @@ class Car {
         var dvdr = dx*vx + dy*vy;
         var dist = 20
 
-        var mag = ((2*1*1*dvdr)/((1+1)*dist))*0.5;
+        var mag = ((2*1*1*dvdr)/((1+1)*dist));
 
         var fx = (mag * dx)/dist;
         var fy = (mag * dy)/dist;
-        var force = (Math.sqrt((fx*fx)+(fy*fy)))*0.015
+        var force = (Math.sqrt((fx*fx)+(fy*fy)))*0.01
         
         this.collisionX = fx;
         this.collisionY = fy;
@@ -191,7 +214,7 @@ class Car {
 
         this.x -= 3*this.speedX;
         this.y -= 3*this.speedY;
-        this.angle -= 3*this.angleSpeed;
+        this.angle -= 2*this.angleSpeed;
 
         this.speedX = -0.9*this.speedX;
         this.speedY = -0.9*this.speedY;
@@ -201,9 +224,9 @@ class Car {
         var c1 = (Math.cos(-this.angle)*(x-this.x)) - (Math.sin(-this.angle)*(y-this.y+10)) > 0
         var c2 = (Math.sin(-this.angle)*(x-this.x)) + (Math.cos(-this.angle)*(y-this.y+10)) > 0
 
-        if (c1 == c2)
-        {this.angleSpeed -= force;}
-        else {this.angleSpeed += force;}
+        //if (c1 == c2)
+        //{this.angleSpeed -= force;}
+        //else {this.angleSpeed += force;}
 
     }
 
@@ -264,52 +287,51 @@ class Car {
 }
 
 //Set up test cars
-var player = new Car(900,450,20,"Sprites/CarTest.png");
-var otherCar = new Car(800,600,1,"Sprites/CarTest.png");
-var hey = new Car(600,600,1,"Sprites/CarTest.png");
-var there = new Car(600,800,1,"Sprites/CarTest.png");
-var ocaml = new Car(700,700,1,"Sprites/CarTest.png");
-var best = new Car(800,800,1,"Sprites/CarTest.png");
+// we iterate through a list of given players
+socket.on("initialize" , function(id , data) {
+    playerID = id;
+    // create the cars
+    for(i in data) {
+        cars[data[i].playerID] = new Car(data[i].playerID , data[i].x , data[i].y , data[i].angle , "Sprites/CarTest.png");
+    }
+    // add cars to each other
+    for(i in cars) {
+        for(j in cars) {
+            if(i != j) {
+                cars[i].addCar(cars[j]);
+            }
+        }
+    }
+});
 
-//This should be refactored
-player.addCar(otherCar);
-player.addCar(hey);
-player.addCar(there);
-player.addCar(ocaml);
-player.addCar(best);
+socket.on("addPlayer" , function(data) {
+    var newCar = new Car(data.playerID , data.x , data.y , data.angle , "Sprites/CarTest.png");
+    for(i in cars) {
+        cars[i].addCar(newCar);
+        newCar.addCar(cars[i]);
+    }
+    cars[data.playerID] = newCar;
+});
 
-otherCar.addCar(player);
-otherCar.addCar(hey);
-otherCar.addCar(there);
-otherCar.addCar(ocaml);
-otherCar.addCar(best);
+socket.on("removePlayer" , function(data) {
+    for(i in cars) {
+        cars[i].removeCar(cars[data.playerID]);
+    }
+    delete cars[data.playerID];
+})
 
-hey.addCar(player);
-hey.addCar(otherCar);
-hey.addCar(there);
-hey.addCar(ocaml);
-hey.addCar(best);
-
-there.addCar(player);
-there.addCar(otherCar);
-there.addCar(hey);
-there.addCar(ocaml);
-there.addCar(best);
-
-ocaml.addCar(player);
-ocaml.addCar(otherCar);
-ocaml.addCar(hey);
-ocaml.addCar(there);
-ocaml.addCar(best);
-
-best.addCar(player);
-best.addCar(otherCar);
-best.addCar(hey);
-best.addCar(there);
-best.addCar(ocaml);
+socket.on("update" , function(data) {
+    cars[data.playerID].x = data.x;
+    cars[data.playerID].y = data.y;
+    cars[data.playerID].speedX = data.speedX;
+    cars[data.playerID].speedY = data.speedY;
+    cars[data.playerID].angle = data.angle;
+    cars[data.playerID].angleSpeed = data.angleSpeed;
+});
 
 var moveInterval = setInterval(function () {
     draw();
+    update();
 }, 15);
 
 function on() {
@@ -324,35 +346,52 @@ function draw() {
     context = canvas.getContext("2d");
     context.clearRect(0, 0, 1800, 900);   
 
-    player.drawOther(background,0,0,0,0,0,context);
+    cars[playerID].drawOther(background,0,0,0,0,0,context);
 
     context.save();
-    context.translate(-(player.x-900), -(player.y-450));
+    context.translate(-(cars[playerID].x-900), -(cars[playerID].y-450));
     context.rotate(0);
     context.fillRect(200,200,300,300); 
     context.restore();
 
-    //This has to be re-factored
-    player.drawCar(otherCar,context);
-    player.drawCar(hey,context);
-    player.drawCar(there,context);
-    player.drawCar(ocaml,context);
-    player.drawCar(best,context);
-    player.drawSelf(context);
+    // iterate through all the cars apart from the player, instead draw self for player
+    for(i in cars) {
+        cars[playerID].drawCar(cars[i] , context);
+    }
+    cars[playerID].drawSelf(context);
 
-    player.checkCarCollison();
-    otherCar.checkCarCollison();
-    hey.checkCarCollison();
-    there.checkCarCollison();
-    ocaml.checkCarCollison();
-    best.checkCarCollison();
+    // run the collision check on each car
+    //for(i in cars) {
+    //    cars[i].checkCarCollision();
+    //}
 
-    player.calculateSpeed(mod,angleMod);
-    otherCar.calculateSpeed(0,0);
-    hey.calculateSpeed(0,0);
-    there.calculateSpeed(0,0);
-    ocaml.calculateSpeed(0,0);
-    best.calculateSpeed(0,0);
+    cars[playerID].checkCarCollision();
+
+     // console.log(cars[playerID].otherCars);
+
+    // we change the player speed to the mod and angle mode
+    // other cars dont have players yet so we set their speed to 0 as a defualt
+    // change to forEach when we are passing objects correctly
+    for(i in cars) {
+        if(i == playerID) {
+            cars[playerID].calculateSpeed(mod , angleMod);
+        } else {
+            cars[i].calculateSpeed(0 , 0);
+        }
+    }
+}
+
+function update() {
+    var update = {
+        playerID: playerID,
+        x: cars[playerID].x,
+        y: cars[playerID].y,
+        speedX: cars[playerID].speedX,
+        speedY: cars[playerID].speedY,
+        angle: cars[playerID].angle,
+        angleSpeed: cars[playerID].angleSpeed,
+    }
+    socket.emit("update" , update);
 }
 
 function keyup_handler(event) {
@@ -382,6 +421,19 @@ function keypress_handler(event) {
     //D (Turn right)
     if (event.keyCode == 68) {
         angleMod = 1;
+    }
+    // test statement to see if the player data in playerList updates
+    if (event.keyCode == 84) {
+        var update = {
+            playerID: playerID,
+            x: cars[playerID].x,
+            y: cars[playerID].y,
+            speedX: cars[playerID].speedX,
+            speedY: cars[playerID].speedY,
+            angle: cars[playerID].angle,
+            angleSpeed: cars[playerID].angleSpeed,
+        }
+        socket.emit("update" , update);
     }
 }
 
