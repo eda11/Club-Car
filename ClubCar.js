@@ -26,6 +26,8 @@ canvas = document.getElementById("gameSpace");
 context = canvas.getContext("2d");
 var img = new Image();
 img.src = "Sprites/CarTest.png";
+var vroomBuckImage = new Image();
+vroomBuckImage.src = "Sprites/VroomBuck.png"
 var background = new Image();
 background.src = "Sprites/Background Test.png";
 
@@ -254,6 +256,10 @@ class Car {
         context.restore();
     }
 
+    drawUI(){
+
+    }
+
     calculateSpeed(speedMod,angleMod){
 
         if (this.collide){
@@ -381,6 +387,7 @@ function draw() {
     }
 }
 
+//Sends position data to the server
 function update() {
     var update = {
         playerID: playerID,
