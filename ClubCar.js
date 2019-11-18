@@ -14,6 +14,11 @@ var playerID = -1;
 //The chatlog
 var chatLog = [];
 
+chatLog.push("Euan : I hope I get this working soon!");
+chatLog.push("Ben : Lol good luck fam");
+chatLog.push("Rob : Well actually, ACtuAlly");
+chatLog.push("xXx_big_Trucker_xXx : how to swag, how to swah, how to swahg, how to swag hwaohfsu");
+
 x = startx;
 y = starty;
 accelaration = 0.4;
@@ -260,14 +265,15 @@ class Car {
     }
 
     drawChat(){
-        //cWidth = $("#gameSpace").width();
-        //cHeight = $("#gameSpace").height();
         context.font = "25px Arial";
-        context.col
-        //context.fillText("Hello World" + $("#gameSpace").width() + $("#gameSpace").height(), $("#gameSpace").width()/2, $("#gameSpace").height()/2);
-        //context.fillText("Hello World " + this.x + "," + this.y, $("#gameSpace").width()/2, $("#gameSpace").height()/2);
-        context.fillText(Math.trunc(this.x), 0, 900);
-        context.fillText(Math.trunc(this.y), 0, 900 - 25);
+        context.fillStyle = "#000000";
+        var arrayAccess;
+        var i;
+        for (var i = 1; i < 4; i++) {
+            arrayAccess = chatLog.length - i;
+            if (arrayAccess < 0){break;}
+            context.fillText(""+chatLog[arrayAccess], 0, 900 - (i*25));
+        }
     }
 
     calculateSpeed(speedMod,angleMod){
@@ -370,8 +376,6 @@ function draw() {
     context.fillRect(200,200,300,300); 
     context.restore();
 
-    cars[playerID].drawChat()
-
     // iterate through all the cars apart from the player, instead draw self for player
     for(i in cars) {
         cars[playerID].drawCar(cars[i] , context);
@@ -397,6 +401,9 @@ function draw() {
             cars[i].calculateSpeed(0 , 0);
         }
     }
+
+    cars[playerID].drawChat();
+
 }
 
 //Sends position data to the server
