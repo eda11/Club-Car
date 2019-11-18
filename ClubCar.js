@@ -11,6 +11,9 @@ heightBackground = 2000
 var cars = [];
 var playerID = -1;
 
+//The chatlog
+var chatLog = [];
+
 x = startx;
 y = starty;
 accelaration = 0.4;
