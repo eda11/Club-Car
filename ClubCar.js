@@ -259,8 +259,11 @@ class Car {
         context.restore();
     }
 
-    drawUI(){
-
+    drawChat(){
+        context.save();
+        context.font = "30px Arial";
+        context.fillText("Hello World", 10, 50);
+        context.restore();
     }
 
     calculateSpeed(speedMod,angleMod){
@@ -362,6 +365,8 @@ function draw() {
     context.rotate(0);
     context.fillRect(200,200,300,300); 
     context.restore();
+
+    cars[playerID].drawChat()
 
     // iterate through all the cars apart from the player, instead draw self for player
     for(i in cars) {
