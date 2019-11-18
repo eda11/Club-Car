@@ -11,8 +11,9 @@ app.use(express.static("./"));
 var socketList = {};
 var playerList = {};
 var playerCount = 0;
+var chatLog = {};
 
-var createPlayer  = function(id) {
+var createPlayer = function(id) {
     // object of all the values of a player we want to recieve/send
     var player = {
         playerID: id,
