@@ -260,10 +260,14 @@ class Car {
     }
 
     drawChat(){
-        context.save();
-        context.font = "30px Arial";
-        context.fillText("Hello World", 10, 50);
-        context.restore();
+        //cWidth = $("#gameSpace").width();
+        //cHeight = $("#gameSpace").height();
+        context.font = "25px Arial";
+        context.col
+        //context.fillText("Hello World" + $("#gameSpace").width() + $("#gameSpace").height(), $("#gameSpace").width()/2, $("#gameSpace").height()/2);
+        //context.fillText("Hello World " + this.x + "," + this.y, $("#gameSpace").width()/2, $("#gameSpace").height()/2);
+        context.fillText(Math.trunc(this.x), 0, 900);
+        context.fillText(Math.trunc(this.y), 0, 900 - 25);
     }
 
     calculateSpeed(speedMod,angleMod){
