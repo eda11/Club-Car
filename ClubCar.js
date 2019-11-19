@@ -1,44 +1,46 @@
 // TODO : Add comments
 
-//The starting position for the car
-startx = 800
-starty = 400
+//Gets canvas from html
+canvas = document.getElementById("gameSpace");
+var ctx = canvas.getContext('2d');
+ctx.fillStyle = '#f00';
+
+//Set up images
+var img = new Image();
+img.src = "Sprites/CarTest.png";
+
+var vroomBuckImage = new Image();
+vroomBuckImage.src = "Sprites/VroomBuck.png"
+
+var background = new Image();
+background.src = "Sprites/Background Test.png";
+
+//Adds keylistners
+window.addEventListener("keydown", keypress_handler, false);
+window.addEventListener("keyup", keyup_handler, false);
+
+// connect the socket to the server and emit a test
+var socket = io.connect();
 
 //The width and height of the background
 widthBackground = 2000
 heightBackground = 2000
 
-var cars = [];
+//Sets up varibles
 var playerID = -1;
-
-//The chatlog
+var cars = [];
 var chatLog = [];
 
+mod = 0;
+angleMod = 0;
+
+// -- Tempoary --
+//The chatlog tests
 chatLog.push("Euan : I hope I get this working soon!");
 chatLog.push("Ben : Lol good luck fam");
 chatLog.push("Rob : Well actually, ACtuAlly");
 chatLog.push("xXx_big_Trucker_xXx : how to swag, how to swah, how to swahg, how to swag hwaohfsu");
-
-mod = 0;
-angleMod = 0;
-canvas = document.getElementById("gameSpace");
-context = canvas.getContext("2d");
-var img = new Image();
-img.src = "Sprites/CarTest.png";
-var vroomBuckImage = new Image();
-vroomBuckImage.src = "Sprites/VroomBuck.png"
-var background = new Image();
-background.src = "Sprites/Background Test.png";
-
-window.addEventListener("keydown", keypress_handler, false);
-window.addEventListener("keyup", keyup_handler, false);
-
-var ctx = canvas.getContext('2d');
-ctx.fillStyle = '#f00';
-
-// connect the socket to the server and emit a test
-var socket = io.connect();
-socket.emit("test");
+// -- Tempoary --
 
 class Car {
     constructor(id , x, y, angle, image) {
@@ -95,6 +97,7 @@ class Car {
     }
 
     updateCorners(){
+        //Calculates positions of the corners of the car
         this.c1x = (Math.cos(this.angle)*(10)) - (Math.sin(this.angle)*(10)) + this.x;
         this.c1y = (Math.sin(this.angle)*(10)) + (Math.cos(this.angle)*(10)) + this.y;
 
@@ -134,48 +137,54 @@ class Car {
     }
 
     checkCarCollision(){
+        //Goes though each car and checks if they collide with this car
+        //If they do then carCollide is called
         for (let i = 0; i < this.otherCars.length; i++){
             if (!(null == this.lineCrossesCar(this.c1x,this.c1y,this.c2x,this.c2y,this.otherCars[i]))){
-                this.carCollide(this.lineCrossesCar(this.c1x,this.c1y,this.c2x,this.c2y,this.otherCars[i]),this.otherCars[i],true);
+                this.carCollide(this.lineCrossesCar(this.c1x,this.c1y,this.c2x,this.c2y,this.otherCars[i]),this.otherCars[i]);
                 break;
             }
             if (!(null == this.lineCrossesCar(this.c2x,this.c2y,this.c3x,this.c3y,this.otherCars[i]))){
-                this.carCollide(this.lineCrossesCar(this.c2x,this.c2y,this.c3x,this.c3y,this.otherCars[i]),this.otherCars[i],true);
+                this.carCollide(this.lineCrossesCar(this.c2x,this.c2y,this.c3x,this.c3y,this.otherCars[i]),this.otherCars[i]);
                 break;
             }
             if (!(null == this.lineCrossesCar(this.c3x,this.c3y,this.c4x,this.c4y,this.otherCars[i]))){
-                this.carCollide(this.lineCrossesCar(this.c3x,this.c3y,this.c4x,this.c4y,this.otherCars[i]),this.otherCars[i],true);
+                this.carCollide(this.lineCrossesCar(this.c3x,this.c3y,this.c4x,this.c4y,this.otherCars[i]),this.otherCars[i]);
                 break;
             }
             if (!(null == this.lineCrossesCar(this.c4x,this.c4y,this.c1x,this.c1y,this.otherCars[i]))){
-                this.carCollide(this.lineCrossesCar(this.c4x,this.c4y,this.c1x,this.c1y,this.otherCars[i]),this.otherCars[i],true);
+                this.carCollide(this.lineCrossesCar(this.c4x,this.c4y,this.c1x,this.c1y,this.otherCars[i]),this.otherCars[i]);
                 break;
             }
         }
     }
 
-    //This needs to be commented
-    carCollide(coor,car,first){
+    
+    carCollide(coor,car){
+        //gets coordinates
         var x = coor[0];
         var y = coor[1];
 
         var thisSpeed = (this.speedX*this.speedX) + (this.speedY*this.speedY)
         var carSpeed = (car.speedX*car.speedX) + (car.speedY*car.speedY)
 
+        //Calculates the forces of the collision
         var fx = (-0.5 * (car.x - this.x));
         var fy = (-0.5 * (car.y - this.y));
 
+        //Applies forces to the car
         car.collisionX = -fx;
         car.collisionY = -fy;
         car.collide = true;
-
         this.collisionX = fx;
         this.collisionY = fy;
         this.collide = true;
 
+        //Calculates where the car hit
         var c1 = (Math.cos(-this.angle)*(x-this.x)) - (Math.sin(-this.angle)*(y-this.y+10)) > 0
         var c2 = (Math.sin(-this.angle)*(x-this.x)) + (Math.cos(-this.angle)*(y-this.y+10)) > 0
 
+        //Applies angler force based off where carc was hit
         if (c1 == c2)
         {this.collisionAngle = -0.3;}
         else {this.collisionAngle = 0.3;}
@@ -183,51 +192,47 @@ class Car {
 
     carCollideCalc(){
         if(this.collisionDelay == 0){
+            //Sets a delay for a collision
             this.collisionDelay = 5;
+
+            //Moves car back from collision
             this.x -= 3*this.speedX;
             this.y -= 3*this.speedY;
 
+            //Applies changes to speed
             this.speedX += this.collisionX;
             this.speedY += this.collisionY;
             this.angleSpeed += this.collisionAngle;
         }
     }
     checkObjectCollison(x1,y1,x2,y2,x3,y3,x4,y4){
+        //Checks if any of the car sides is colliding with an object
+        //If it is it calls the object collide function
         if (!(null == this.lineCrossesCar(x1,y1,x2,y2,this))){
-            this.objectCollide(this.lineCrossesCar(x1,y1,x2,y2,this));
+            this.objectCollide();
         }
         else if (!(null == this.lineCrossesCar(x2,y2,x3,y3,this))){
-            this.objectCollide(this.lineCrossesCar(x2,y2,x3,y3,this));
+            this.objectCollide();
         }
         else if (!(null == this.lineCrossesCar(x3,y3,x4,y4,this))){
-            this.objectCollide(this.lineCrossesCar(x3,y3,x4,y4,this));
+            this.objectCollide();
         }
         else if (!(null == this.lineCrossesCar(x4,y4,x1,y1,this))){
-            this.objectCollide(this.lineCrossesCar(x4,y4,x1,y1,this));
+            this.objectCollide();
         }
 
     }
 
-    objectCollide(coor){
-        var x = coor[0];
-        var y = coor[1];
+    objectCollide(){
 
+        //Pushes car from objects
         this.x -= 3*this.speedX;
         this.y -= 3*this.speedY;
         this.angle -= 2*this.angleSpeed;
 
-
-        this.speedX = -0.9*this.speedX;
-        this.speedY = -0.9*this.speedY;
-
-        var force = 4*0.015
-
-        var c1 = (Math.cos(-this.angle)*(x-this.x)) - (Math.sin(-this.angle)*(y-this.y+10)) > 0
-        var c2 = (Math.sin(-this.angle)*(x-this.x)) + (Math.cos(-this.angle)*(y-this.y+10)) > 0
-
-        //if (c1 == c2)
-        //{this.angleSpeed -= force;}
-        //else {this.angleSpeed += force;}
+        //Reverses speed
+        this.speedX = -this.speedX;
+        this.speedY = -this.speedY;
 
     }
 
@@ -269,13 +274,11 @@ class Car {
 
     calculateSpeed(speedMod,angleMod){
 
+        //Handles collisions with other cars
         if(this.collisionDelay > 0) this.collisionDelay--;
-
         if (this.collide){
             this.carCollideCalc()
-            console.log("Collide")
             this.collide = false;
-            
         }
 
         //Increase the speed in the correct direction
@@ -288,20 +291,72 @@ class Car {
         this.speedX = Approach(this.speedX, 0, this.friction*Math.abs(this.speedX/this.maxSpeed));
         this.speedY = Approach(this.speedY, 0, this.friction*Math.abs(this.speedY/this.maxSpeed));
 
-        this.angle += this.angleSpeed;
-        if (this.angle > 2*Math.PI){this.angle -= 2*Math.PI}
-        if (this.angle < 0){this.angle += 2*Math.PI}
+        //Applies speed to car postion
         this.x += (this.speedX);
         this.y += (this.speedY);
+        this.angle += this.angleSpeed;
 
+        //Makes sure angle is between 0 and 2PI
+        if (this.angle > 2*Math.PI){this.angle -= 2*Math.PI}
+        if (this.angle < 0){this.angle += 2*Math.PI}
+
+        //Checks if the car has collided with an object
         this.checkObjectCollison(0,0,0,2000,2000,2000,2000,0)
-        this.checkObjectCollison(200,200,200,500,500,500,500,200)
 
         this.updateCorners();
     }
 }
 
-//Set up test cars
+var moveInterval = setInterval(function () {
+    draw();
+    cars[playerID].checkCarCollision();
+    updateSpeed();
+    update();
+}, 15);
+
+function draw() {
+    context = canvas.getContext("2d");
+
+    //Clears game
+    context.clearRect(0, 0, 1800, 900);   
+
+    //Draws background
+    cars[playerID].drawOther(background,0,0,0,0,0,context);
+
+    //Draws cars
+    for(i in cars) {
+        cars[playerID].drawCar(cars[i] , context);
+    }
+    cars[playerID].drawSelf(context);
+
+    //Draws chat
+    cars[playerID].drawChat();
+}
+
+function updateSpeed(){
+    for(i in cars) {
+        if(i == playerID) {
+            cars[playerID].calculateSpeed(mod , angleMod);
+        } else {
+            cars[i].calculateSpeed(0 , 0);
+        }
+    }
+}
+
+//Sends position data to the server
+function update() {
+    var update = {
+        playerID: playerID,
+        x: cars[playerID].x,
+        y: cars[playerID].y,
+        speedX: cars[playerID].speedX,
+        speedY: cars[playerID].speedY,
+        angle: cars[playerID].angle,
+        angleSpeed: cars[playerID].angleSpeed,
+    }
+    socket.emit("update" , update);
+}
+
 // we iterate through a list of given players
 socket.on("initialize" , function(id , data) {
     playerID = id;
@@ -344,74 +399,13 @@ socket.on("update" , function(data) {
     cars[data.playerID].angleSpeed = data.angleSpeed;
 });
 
-var moveInterval = setInterval(function () {
-    draw();
-    update();
-}, 15);
-
 function on() {
-  document.getElementById("overlay").style.display = "block";
-}
-
-function off() {
-  document.getElementById("overlay").style.display = "none";
-}
-
-function draw() {
-    context = canvas.getContext("2d");
-    context.clearRect(0, 0, 1800, 900);   
-
-    cars[playerID].drawOther(background,0,0,0,0,0,context);
-
-    context.save();
-    context.translate(-(cars[playerID].x-900), -(cars[playerID].y-450));
-    context.rotate(0);
-    context.fillRect(200,200,300,300); 
-    context.restore();
-
-    // iterate through all the cars apart from the player, instead draw self for player
-    for(i in cars) {
-        cars[playerID].drawCar(cars[i] , context);
-    }
-    cars[playerID].drawSelf(context);
-
-    // run the collision check on each car
-    //for(i in cars) {
-    //    cars[i].checkCarCollision();
-    //}
-
-    cars[playerID].checkCarCollision();
-
-     // console.log(cars[playerID].otherCars);
-
-    // we change the player speed to the mod and angle mode
-    // other cars dont have players yet so we set their speed to 0 as a defualt
-    // change to forEach when we are passing objects correctly
-    for(i in cars) {
-        if(i == playerID) {
-            cars[playerID].calculateSpeed(mod , angleMod);
-        } else {
-            cars[i].calculateSpeed(0 , 0);
-        }
-    }
-
-    cars[playerID].drawChat();
-
-}
-
-//Sends position data to the server
-function update() {
-    var update = {
-        playerID: playerID,
-        x: cars[playerID].x,
-        y: cars[playerID].y,
-        speedX: cars[playerID].speedX,
-        speedY: cars[playerID].speedY,
-        angle: cars[playerID].angle,
-        angleSpeed: cars[playerID].angleSpeed,
-    }
-    socket.emit("update" , update);
-}
+    document.getElementById("overlay").style.display = "block";
+  }
+  
+  function off() {
+    document.getElementById("overlay").style.display = "none";
+  }
 
 function keyup_handler(event) {
     //W or S (forwards or reverse)
@@ -441,19 +435,6 @@ function keypress_handler(event) {
     if (event.keyCode == 68) {
         angleMod = 1;
     }
-    // test statement to see if the player data in playerList updates
-    if (event.keyCode == 84) {
-        var update = {
-            playerID: playerID,
-            x: cars[playerID].x,
-            y: cars[playerID].y,
-            speedX: cars[playerID].speedX,
-            speedY: cars[playerID].speedY,
-            angle: cars[playerID].angle,
-            angleSpeed: cars[playerID].angleSpeed,
-        }
-        socket.emit("update" , update);
-    }
 }
 
 //Takes a value and moves it towards the desired ammount
@@ -474,7 +455,7 @@ function Approach(currentValue, desiredValue, ammount ) {
     return currentValue
 }
 
-//Checks if 2 bounding boxes intersect
+//Checks if 2 lines intersect
 function intersect(x1,y1,x2,y2,x3,y3,x4,y4){
     s1x = x2 - x1;
     s1y = y2 - y1;
