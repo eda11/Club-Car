@@ -19,15 +19,6 @@ chatLog.push("Ben : Lol good luck fam");
 chatLog.push("Rob : Well actually, ACtuAlly");
 chatLog.push("xXx_big_Trucker_xXx : how to swag, how to swah, how to swahg, how to swag hwaohfsu");
 
-x = startx;
-y = starty;
-accelaration = 0.4;
-maxSpeed = 6;
-speedX = 0;
-speedY = 0;
-friction = 0.2;
-angle = 0;
-angleSpeed = 0;
 mod = 0;
 angleMod = 0;
 canvas = document.getElementById("gameSpace");
@@ -89,6 +80,8 @@ class Car {
 
         this.c4x = 0;
         this.c4y = 0;
+
+        this.collisionDelay = 0;
 
         this.collide = false;
 
@@ -166,41 +159,38 @@ class Car {
         var x = coor[0];
         var y = coor[1];
 
-        //if (first) {car.carCollide(coor,this,false)};
+        var thisSpeed = (this.speedX*this.speedX) + (this.speedY*this.speedY)
+        var carSpeed = (car.speedX*car.speedX) + (car.speedY*car.speedY)
 
-        this.collide = true;
+        var fx = (-0.5 * (car.x - this.x));
+        var fy = (-0.5 * (car.y - this.y));
 
-        var dx = car.x - this.x;
-        var dy = car.y - this.y;
-        var vx = car.speedX - this.speedX;
-        var vy = car.speedY - this.speedY;
-        var dvdr = dx*vx + dy*vy;
-        var dist = 20
+        car.collisionX = -fx;
+        car.collisionY = -fy;
+        car.collide = true;
 
-        var mag = ((2*1*1*dvdr)/((1+1)*dist));
-
-        var fx = (mag * dx)/dist;
-        var fy = (mag * dy)/dist;
-        var force = (Math.sqrt((fx*fx)+(fy*fy)))*0.01
-        
         this.collisionX = fx;
         this.collisionY = fy;
+        this.collide = true;
 
         var c1 = (Math.cos(-this.angle)*(x-this.x)) - (Math.sin(-this.angle)*(y-this.y+10)) > 0
         var c2 = (Math.sin(-this.angle)*(x-this.x)) + (Math.cos(-this.angle)*(y-this.y+10)) > 0
 
         if (c1 == c2)
-        {this.collisionAngle = force*-1;}
-        else {this.collisionAngle = force;}
+        {this.collisionAngle = -0.3;}
+        else {this.collisionAngle = 0.3;}
     }
 
     carCollideCalc(){
-        this.x -= 3*this.speedX;
-        this.y -= 3*this.speedY;
+        if(this.collisionDelay == 0){
+            this.collisionDelay = 5;
+            this.x -= 3*this.speedX;
+            this.y -= 3*this.speedY;
 
-        this.speedX += this.collisionX;
-        this.speedY += this.collisionY;
-        this.angleSpeed += this.collisionAngle;
+            this.speedX += this.collisionX;
+            this.speedY += this.collisionY;
+            this.angleSpeed += this.collisionAngle;
+        }
     }
     checkObjectCollison(x1,y1,x2,y2,x3,y3,x4,y4){
         if (!(null == this.lineCrossesCar(x1,y1,x2,y2,this))){
@@ -225,6 +215,7 @@ class Car {
         this.x -= 3*this.speedX;
         this.y -= 3*this.speedY;
         this.angle -= 2*this.angleSpeed;
+
 
         this.speedX = -0.9*this.speedX;
         this.speedY = -0.9*this.speedY;
@@ -277,6 +268,8 @@ class Car {
     }
 
     calculateSpeed(speedMod,angleMod){
+
+        if(this.collisionDelay > 0) this.collisionDelay--;
 
         if (this.collide){
             this.carCollideCalc()
