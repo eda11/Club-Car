@@ -33,11 +33,9 @@ class VroomBuck{
         }
     }
 
-    update(id,x,y){
-        if(this.id == id){
-            this.x = x;
-            this.y = y;
-        }
+    update(x,y){
+        this.x = x;
+        this.y = y;
     }
 
     move(){
@@ -49,7 +47,6 @@ class VroomBuck{
 for(i = 0; i<100;i++){
     VroomBuckList[i] = new VroomBuck(i,Math.round(Math.random()*1980)+10,Math.round(Math.random()*1980)+10);
 }
-console.log(VroomBuckList);
 
 var createPlayer = function(id) {
     // object of all the values of a player we want to recieve/send
@@ -88,7 +85,7 @@ io.on("connection" , function(socket) {
     });
 
     socket.on("updateVroom",function(id,x,y){
-        console.log(x,y)
+        VroomBuckList[id].update(x,y)
         socket.broadcast.emit("updateVroom",id,x,y)
     })
 
