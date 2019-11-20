@@ -72,7 +72,7 @@ io.on("connection" , function(socket) {
     socketList[socket.id] = socket;
     var player = createPlayer(socket.id);
     playerList[socket.id] = player;
-    socket.broadcast.emit("getMessage","A New Player Has Connected!");
+    socket.broadcast.emit("getMessage","Car" + socket.id + " Has Connected!");
 
     socket.emit("initialize" , socket.id , playerList,VroomBuckList);
     socket.broadcast.emit("addPlayer" , playerList[socket.id]);
@@ -91,7 +91,7 @@ io.on("connection" , function(socket) {
     })
 
     socket.on("sendMessage",function(message){
-        var newMessage = "" + socket.id + message.text;
+        var newMessage = "Car" + socket.id + ":" + message.text;
         socket.broadcast.emit("getMessage",newMessage);
     });
 
@@ -100,7 +100,7 @@ io.on("connection" , function(socket) {
         console.log("disconnected");
         delete socketList[socket.id];
         delete playerList[socket.id];
-        socket.broadcast.emit("getMessage","A player has disconnected...");
+        socket.broadcast.emit("getMessage","Car" + socket.id + " has disconnected...");
     });
 
     socket.on("test" , function() {

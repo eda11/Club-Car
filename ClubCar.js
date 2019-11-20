@@ -376,9 +376,11 @@ function drawChat(){
     for (var i = 1; i < 4; i++) {
         arrayAccess = chatLog.length - i;
         if (arrayAccess < 0){break;}
-        context.fillText(""+chatLog[arrayAccess], 0, 900 - (i*25));
+        context.fillText(""+chatLog[arrayAccess], 0, 875 - (i*25));
     }
-    context.fillText(message, 0, 900);
+    if (typing) {context.fillText(message + "_", 0, 875);}
+    else {context.fillText(message, 0, 875);}
+    
 }
 
 function drawScoreBoard(){
@@ -508,6 +510,7 @@ function keypress_handler(event) {
         }
     }
     else {
+        //Begin typing
         if (event.keyCode == 13){
             typing = false;
             if (message.length != 0) {
@@ -519,9 +522,18 @@ function keypress_handler(event) {
                 message = "";
             }
         }
+        //Backspace
+        else if (event.keyCode == 8){
+            if (message.length != 0) {
+                var tempString = message.substring(0,message.length-1);
+                message = tempString;
+            }
+        }
         else {
             //Add to the message
-            message += event.key;
+            if ((event.key).length == 1) {
+                message += event.key;
+            }
         }
     }
 }
