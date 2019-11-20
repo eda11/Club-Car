@@ -11,7 +11,42 @@ app.use(express.static("./"));
 var socketList = {};
 var playerList = {};
 var playerCount = 0;
+var VroomBuckList = [];
 var chatLog = {};
+
+class VroomBuck{
+    constructor(id,x,y){
+        this.id = id;
+
+        this.x = x;
+        this.y = y;
+    }
+    draw(car,context){
+        car.drawOther(vroomBuckImage,0,this.x,this.y,0,0,context)
+    }
+
+    checkPickUp(car){
+        if(car.checkObjectCollison(this.x-10,this.y-10,  this.x+10,this.y-10,  this.x+10,this.y+10,  this.x-10,this.y+10)){
+            console.log("Collide");
+            car.score += 5;
+            this.move();
+        }
+    }
+
+    update(x,y){
+        this.x = x;
+        this.y = y;
+    }
+
+    move(){
+        this.x = Math.round(Math.random()*1980)+10
+        this.y = Math.round(Math.random()*1980)+10
+    }
+}
+
+for(i = 0; i<100;i++){
+    VroomBuckList[i] = new VroomBuck(i,Math.round(Math.random()*1980)+10,Math.round(Math.random()*1980)+10);
+}
 
 var createPlayer = function(id) {
     // object of all the values of a player we want to recieve/send
@@ -38,7 +73,7 @@ io.on("connection" , function(socket) {
     var player = createPlayer(socket.id);
     playerList[socket.id] = player;
 
-    socket.emit("initialize" , socket.id , playerList);
+    socket.emit("initialize" , socket.id , playerList,VroomBuckList);
     socket.broadcast.emit("addPlayer" , playerList[socket.id]);
 
     socket.on("update" , function(data) {
@@ -48,6 +83,11 @@ io.on("connection" , function(socket) {
             socket.broadcast.emit("update" , playerList[socket.id]);
         }
     });
+
+    socket.on("updateVroom",function(id,x,y){
+        VroomBuckList[id].update(x,y)
+        socket.broadcast.emit("updateVroom",id,x,y)
+    })
 
     socket.on("disconnect" , function() {
         socket.broadcast.emit("removePlayer" , playerList[socket.id]);

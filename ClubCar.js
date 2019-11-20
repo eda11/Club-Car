@@ -30,6 +30,7 @@ heightBackground = 2000
 var playerID = -1;
 var cars = [];
 var chatLog = [];
+var VroomBuckList = [];
 
 var message = "";
 
@@ -48,6 +49,7 @@ class Car {
     constructor(id , x, y, angle, image) {
         //Initialise car at the x and y coordinates
         this.id = id;
+        this.score = 0;
 
         this.startx = x;
         this.starty = y;
@@ -211,16 +213,16 @@ class Car {
         //Checks if any of the car sides is colliding with an object
         //If it is it calls the object collide function
         if (!(null == this.lineCrossesCar(x1,y1,x2,y2,this))){
-            this.objectCollide();
+            return true;
         }
         else if (!(null == this.lineCrossesCar(x2,y2,x3,y3,this))){
-            this.objectCollide();
+            return true;
         }
         else if (!(null == this.lineCrossesCar(x3,y3,x4,y4,this))){
-            this.objectCollide();
+            return true;
         }
         else if (!(null == this.lineCrossesCar(x4,y4,x1,y1,this))){
-            this.objectCollide();
+            return true;
         }
 
     }
@@ -271,6 +273,9 @@ class Car {
             this.collide = false;
         }
 
+        //Update Maxspeed
+        this.maxSpeed = 6 + 0.02*this.score;
+
         //Increase the speed in the correct direction
         this.angleSpeed += angleMod*0.005;
         this.speedX += this.accelaration*Math.cos(this.angle)*speedMod; 
@@ -291,9 +296,40 @@ class Car {
         if (this.angle < 0){this.angle += 2*Math.PI}
 
         //Checks if the car has collided with an object
-        this.checkObjectCollison(0,0,0,2000,2000,2000,2000,0)
+        if(this.checkObjectCollison(0,0,0,2000,2000,2000,2000,0)) this.objectCollide();
 
         this.updateCorners();
+    }
+}
+
+class VroomBuck{
+    constructor(id,x,y){
+        this.id = id;
+
+        this.x = x;
+        this.y = y;
+    }
+    draw(car,context){
+        car.drawOther(vroomBuckImage,0,this.x,this.y,0,0,context)
+    }
+
+    checkPickUp(car){
+        if(car.checkObjectCollison(this.x-10,this.y-10,  this.x+10,this.y-10,  this.x+10,this.y+10,  this.x-10,this.y+10)){
+            console.log("Collide");
+            car.score += 5;
+            this.move();
+        }
+    }
+
+    update(x,y){
+        this.x = x;
+        this.y = y;
+    }
+
+    move(){
+        this.x = Math.round(Math.random()*1980)+10
+        this.y = Math.round(Math.random()*1980)+10
+        socket.emit("updateVroom",this.id,this.x,this.y);
     }
 }
 
@@ -312,6 +348,10 @@ function draw() {
 
     //Draws background
     cars[playerID].drawOther(background,0,0,0,0,0,context);
+    for(i in VroomBuckList){
+        VroomBuckList[i].draw(cars[playerID], context);
+        VroomBuckList[i].checkPickUp(cars[playerID]);
+    }
 
     //Draws cars
     for(i in cars) {
@@ -369,8 +409,10 @@ function update() {
 }
 
 // we iterate through a list of given players
-socket.on("initialize" , function(id , data) {
+socket.on("initialize" , function(id , data, vrooms) {
     playerID = id;
+    for(i in vrooms) VroomBuckList[i] = new VroomBuck(vrooms[i].id,vrooms[i].x,vrooms[i].y);
+    console.log(VroomBuckList);
     // create the cars
     for(i in data) {
         cars[data[i].playerID] = new Car(data[i].playerID , data[i].x , data[i].y , data[i].angle , "Sprites/CarTest.png");
@@ -415,6 +457,10 @@ socket.on("update" , function(data) {
 socket.on("getMessage", function(data) {
     chatLog.push(data.message);
 });
+
+socket.on("updateVroom",function(id,x,y){
+    VroomBuckList[id].update(x,y);
+})
 
 function on() {
     document.getElementById("overlay").style.display = "block";
