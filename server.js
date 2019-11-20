@@ -72,6 +72,7 @@ io.on("connection" , function(socket) {
     socketList[socket.id] = socket;
     var player = createPlayer(socket.id);
     playerList[socket.id] = player;
+    socket.broadcast.emit("getMessage","A New Player Has Connected!");
 
     socket.emit("initialize" , socket.id , playerList,VroomBuckList);
     socket.broadcast.emit("addPlayer" , playerList[socket.id]);
@@ -89,11 +90,17 @@ io.on("connection" , function(socket) {
         socket.broadcast.emit("updateVroom",id,x,y)
     })
 
+    socket.on("sendMessage",function(message){
+        var newMessage = "" + socket.id + message.text;
+        socket.broadcast.emit("getMessage",newMessage);
+    });
+
     socket.on("disconnect" , function() {
         socket.broadcast.emit("removePlayer" , playerList[socket.id]);
         console.log("disconnected");
         delete socketList[socket.id];
         delete playerList[socket.id];
+        socket.broadcast.emit("getMessage","A player has disconnected...");
     });
 
     socket.on("test" , function() {

@@ -34,15 +34,17 @@ var VroomBuckList = [];
 
 var message = "";
 
+var typing = false;
+
 mod = 0;
 angleMod = 0;
 
 // -- Tempoary --
 //The chatlog tests
-chatLog.push("Euan : I hope I get this working soon!");
-chatLog.push("Ben : Lol good luck fam");
-chatLog.push("Rob : Well actually, ACtuAlly");
-chatLog.push("xXx_big_Trucker_xXx : how to swag, how to swah, how to swahg, how to swag hwaohfsu");
+//chatLog.push("Euan : I hope I get this working soon!");
+//chatLog.push("Ben : Lol good luck fam");
+//chatLog.push("Rob : Well actually, ACtuAlly");
+//chatLog.push("xXx_big_Trucker_xXx : how to swag, how to swah, how to swahg, how to swag hwaohfsu");
 // -- Tempoary --
 
 class Car {
@@ -376,6 +378,7 @@ function drawChat(){
         if (arrayAccess < 0){break;}
         context.fillText(""+chatLog[arrayAccess], 0, 900 - (i*25));
     }
+    context.fillText(message, 0, 900);
 }
 
 function drawScoreBoard(){
@@ -434,7 +437,6 @@ socket.on("addPlayer" , function(data) {
         newCar.addCar(cars[i]);
     }
     cars[data.playerID] = newCar;
-    chatLog.push("[SYSTEM] : A New Player Has Joined!");
 });
 
 socket.on("removePlayer" , function(data) {
@@ -442,7 +444,6 @@ socket.on("removePlayer" , function(data) {
         cars[i].removeCar(cars[data.playerID]);
     }
     delete cars[data.playerID];
-    chatLog.push("[SYSTEM] : A Player has left...");
 })
 
 socket.on("update" , function(data) {
@@ -455,7 +456,7 @@ socket.on("update" , function(data) {
 });
 
 socket.on("getMessage", function(data) {
-    chatLog.push(data.message);
+    chatLog.push(data);
 });
 
 socket.on("updateVroom",function(id,x,y){
@@ -466,9 +467,9 @@ function on() {
     document.getElementById("overlay").style.display = "block";
   }
   
-  function off() {
+function off() {
     document.getElementById("overlay").style.display = "none";
-  }
+}
 
 function keyup_handler(event) {
     //W or S (forwards or reverse)
@@ -482,21 +483,46 @@ function keyup_handler(event) {
 }
 
 function keypress_handler(event) {
-    //W (Forwards)
-    if (event.keyCode == 87) {
-        mod = 1;
+
+    if (!typing) {
+            //W (Forwards)
+        if (event.keyCode == 87) {
+            mod = 1;
+        }
+        //S (Reverse)
+        if (event.keyCode == 83) {
+            mod = -0.6;
+        }
+        //A (Turn left)
+        if (event.keyCode == 65) {
+            angleMod = -1;
+        }
+        //D (Turn right)
+        if (event.keyCode == 68) {
+            angleMod = 1;
+        }
+
+        //Enter (start message)
+        if (event.keyCode == 13){
+            typing = true;
+        }
     }
-    //S (Reverse)
-    if (event.keyCode == 83) {
-        mod = -0.6;
-    }
-    //A (Turn left)
-    if (event.keyCode == 65) {
-        angleMod = -1;
-    }
-    //D (Turn right)
-    if (event.keyCode == 68) {
-        angleMod = 1;
+    else {
+        if (event.keyCode == 13){
+            typing = false;
+            if (message.length != 0) {
+                //Send the message
+                var sendMessage = {
+                    text: message 
+                }
+                socket.emit("sendMessage",sendMessage);
+                message = "";
+            }
+        }
+        else {
+            //Add to the message
+            message += event.key;
+        }
     }
 }
 
