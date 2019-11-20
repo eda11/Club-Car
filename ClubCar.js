@@ -31,6 +31,8 @@ var playerID = -1;
 var cars = [];
 var chatLog = [];
 
+var message = "";
+
 mod = 0;
 angleMod = 0;
 
@@ -260,18 +262,6 @@ class Car {
         context.restore();
     }
 
-    drawChat(){
-        context.font = "25px Arial";
-        context.fillStyle = "#000000";
-        var arrayAccess;
-        var i;
-        for (var i = 1; i < 4; i++) {
-            arrayAccess = chatLog.length - i;
-            if (arrayAccess < 0){break;}
-            context.fillText(""+chatLog[arrayAccess], 0, 900 - (i*25));
-        }
-    }
-
     calculateSpeed(speedMod,angleMod){
 
         //Handles collisions with other cars
@@ -330,7 +320,28 @@ function draw() {
     cars[playerID].drawSelf(context);
 
     //Draws chat
-    cars[playerID].drawChat();
+    drawChat(context);
+    
+    //Draws scoreBoard
+    drawScoreBoard(context);
+}
+
+function drawChat(){
+    context.font = "25px Arial";
+    context.fillStyle = "#000000";
+    var arrayAccess;
+    var i;
+    for (var i = 1; i < 4; i++) {
+        arrayAccess = chatLog.length - i;
+        if (arrayAccess < 0){break;}
+        context.fillText(""+chatLog[arrayAccess], 0, 900 - (i*25));
+    }
+}
+
+function drawScoreBoard(){
+    context.font = "25px Arial";
+    context.fillStyle = "#000000";
+    context.fillText("TESTING", 0, 25);
 }
 
 function updateSpeed(){
@@ -381,6 +392,7 @@ socket.on("addPlayer" , function(data) {
         newCar.addCar(cars[i]);
     }
     cars[data.playerID] = newCar;
+    chatLog.push("[SYSTEM] : A New Player Has Joined!");
 });
 
 socket.on("removePlayer" , function(data) {
@@ -388,6 +400,7 @@ socket.on("removePlayer" , function(data) {
         cars[i].removeCar(cars[data.playerID]);
     }
     delete cars[data.playerID];
+    chatLog.push("[SYSTEM] : A Player has left...");
 })
 
 socket.on("update" , function(data) {
@@ -397,6 +410,10 @@ socket.on("update" , function(data) {
     cars[data.playerID].speedY = data.speedY;
     cars[data.playerID].angle = data.angle;
     cars[data.playerID].angleSpeed = data.angleSpeed;
+});
+
+socket.on("getMessage", function(data) {
+    chatLog.push(data.message);
 });
 
 function on() {
