@@ -49,10 +49,10 @@ angleMod = 0;
 // -- Tempoary --
 
 class Car {
-    constructor(id , x, y, angle, image) {
+    constructor(id , score,  x, y, angle, image) {
         //Initialise car at the x and y coordinates
         this.id = id;
-        this.score = 0;
+        this.score = score;
 
         this.startx = x;
         this.starty = y;
@@ -404,6 +404,7 @@ function updateSpeed(){
 function update() {
     var update = {
         playerID: playerID,
+        score: cars[playerID].score,
         x: cars[playerID].x,
         y: cars[playerID].y,
         speedX: cars[playerID].speedX,
@@ -421,7 +422,7 @@ socket.on("initialize" , function(id , data, vrooms) {
     console.log(VroomBuckList);
     // create the cars
     for(i in data) {
-        cars[data[i].playerID] = new Car(data[i].playerID , data[i].x , data[i].y , data[i].angle , "Sprites/CarTest.png");
+        cars[data[i].playerID] = new Car(data[i].playerID , data[i].score , data[i].x , data[i].y , data[i].angle , "Sprites/CarTest.png");
     }
     // add cars to each other
     for(i in cars) {
@@ -434,7 +435,7 @@ socket.on("initialize" , function(id , data, vrooms) {
 });
 
 socket.on("addPlayer" , function(data) {
-    var newCar = new Car(data.playerID , data.x , data.y , data.angle , "Sprites/CarTest.png");
+    var newCar = new Car(data.playerID , data.score , data.x , data.y , data.angle , "Sprites/CarTest.png");
     for(i in cars) {
         cars[i].addCar(newCar);
         newCar.addCar(cars[i]);
@@ -447,9 +448,10 @@ socket.on("removePlayer" , function(data) {
         cars[i].removeCar(cars[data.playerID]);
     }
     delete cars[data.playerID];
-})
+});
 
 socket.on("update" , function(data) {
+    cars[data.playerID].score = data.score;
     cars[data.playerID].x = data.x;
     cars[data.playerID].y = data.y;
     cars[data.playerID].speedX = data.speedX;
@@ -458,13 +460,26 @@ socket.on("update" , function(data) {
     cars[data.playerID].angleSpeed = data.angleSpeed;
 });
 
+socket.on("move" , function(data) {
+    cars[playerID].x = data.x;
+    cars[playerID].y = data.y;
+    cars[playerID].speedX = data.speedX;
+    cars[playerID].speedY = data.speedY;
+    cars[playerID].angle = data.angle;
+    cars[playerID].angleSpeed = data.angleSpeed;
+});
+
 socket.on("getMessage", function(data) {
     chatLog.push(data);
 });
 
+socket.on("speed" , function(data) {
+    cars[playerID].score = data
+});
+
 socket.on("updateVroom",function(id,x,y){
     VroomBuckList[id].update(x,y);
-})
+});
 
 function on() {
     document.getElementById("overlay").style.display = "block";

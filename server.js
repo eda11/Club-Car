@@ -52,6 +52,7 @@ var createPlayer = function(id) {
     // object of all the values of a player we want to recieve/send
     var player = {
         playerID: id,
+        score: 0,
         x: 800,
         y: 400,
         speedX: 0,
@@ -74,7 +75,7 @@ io.on("connection" , function(socket) {
     playerList[socket.id] = player;
     socket.broadcast.emit("getMessage","Car" + socket.id + " Has Connected!");
 
-    socket.emit("initialize" , socket.id , playerList,VroomBuckList);
+    socket.emit("initialize" , socket.id , playerList , VroomBuckList);
     socket.broadcast.emit("addPlayer" , playerList[socket.id]);
 
     socket.on("update" , function(data) {
@@ -92,8 +93,24 @@ io.on("connection" , function(socket) {
 
     socket.on("sendMessage",function(message){
         if (message.text.length > 60) {message.text = message.text.substring(0, 60)}
-        var newMessage = "Car" + socket.id + ":" + message.text;
-        socket.broadcast.emit("getMessage",newMessage);
+        if(message.text === "!spawn") {
+            playerList[socket.id].x = 800;
+            playerList[socket.id].y = 400;
+            playerList[socket.id].speedX = 0,
+            playerList[socket.id].speedY = 0,
+            playerList[socket.id].angle = 0,
+            playerList[socket.id].angleSpeed = 0,
+            socket.emit("move" , playerList[socket.id]);
+        }
+        else if(message.text === "!speedBoost") {
+            playerList[socket.id].score += 100
+            socket.emit("speed" , playerList[socket.id].score);
+        }
+        else {
+            var newMessage = "Car" + socket.id + ":" + message.text;
+            socket.broadcast.emit("getMessage",newMessage);
+        }
+
     });
 
     socket.on("disconnect" , function() {
