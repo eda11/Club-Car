@@ -13,7 +13,7 @@ var vroomBuckImage = new Image();
 vroomBuckImage.src = "Sprites/VroomBuck.png"
 
 var background = new Image();
-background.src = "Sprites/Background Test.png";
+background.src = "Sprites/Background.png";
 
 //Adds keylistners
 window.addEventListener("keydown", keypress_handler, false);
