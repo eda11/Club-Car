@@ -91,6 +91,7 @@ io.on("connection" , function(socket) {
     })
 
     socket.on("sendMessage",function(message){
+        if (message.text.length > 60) {message.text = message.text.substring(0, 60)}
         var newMessage = "Car" + socket.id + ":" + message.text;
         socket.broadcast.emit("getMessage",newMessage);
     });

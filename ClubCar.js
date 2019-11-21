@@ -30,6 +30,7 @@ heightBackground = 2000
 var playerID = -1;
 var cars = [];
 var chatLog = [];
+var scoreBoard = [];
 var VroomBuckList = [];
 
 var message = "";
@@ -373,7 +374,7 @@ function drawChat(){
     context.fillStyle = "#000000";
     var arrayAccess;
     var i;
-    for (var i = 1; i < 4; i++) {
+    for (var i = 1; i < 6; i++) {
         arrayAccess = chatLog.length - i;
         if (arrayAccess < 0){break;}
         context.fillText(""+chatLog[arrayAccess], 0, 875 - (i*25));
@@ -531,7 +532,7 @@ function keypress_handler(event) {
         }
         else {
             //Add to the message
-            if ((event.key).length == 1) {
+            if ((event.key).length == 1 && message.length < 60) {
                 message += event.key;
             }
         }
