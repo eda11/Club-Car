@@ -387,7 +387,7 @@ function drawChat(){
 function drawScoreBoard(){
     context.font = "25px Arial";
     context.fillStyle = "#000000";
-    context.fillText("TESTING", 0, 25);
+    context.fillText("" + cars[playerID].score, 0, 25);
 }
 
 function updateSpeed(){
