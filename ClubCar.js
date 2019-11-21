@@ -40,14 +40,6 @@ var typing = false;
 mod = 0;
 angleMod = 0;
 
-// -- Tempoary --
-//The chatlog tests
-//chatLog.push("Euan : I hope I get this working soon!");
-//chatLog.push("Ben : Lol good luck fam");
-//chatLog.push("Rob : Well actually, ACtuAlly");
-//chatLog.push("xXx_big_Trucker_xXx : how to swag, how to swah, how to swahg, how to swag hwaohfsu");
-// -- Tempoary --
-
 class Car {
     constructor(id , score,  x, y, angle, image) {
         //Initialise car at the x and y coordinates
@@ -343,6 +335,8 @@ var moveInterval = setInterval(function () {
     update();
 }, 15);
 
+
+//Draw to the canvas
 function draw() {
     context = canvas.getContext("2d");
 
@@ -369,23 +363,28 @@ function draw() {
     drawScoreBoard(context);
 }
 
+//Draws the chat
 function drawChat(){
-    context.font = "25px Arial";
+    context.font = "Bold 25px Courier New";
     context.fillStyle = "#000000";
     var arrayAccess;
     var i;
+    //Draws the 5 most recent messages on the canvas
     for (var i = 1; i < 6; i++) {
         arrayAccess = chatLog.length - i;
         if (arrayAccess < 0){break;}
         context.fillText(""+chatLog[arrayAccess], 0, 875 - (i*25));
     }
+    //Draws the current message
     if (typing) {context.fillText(message + "_", 0, 875);}
     else {context.fillText(message, 0, 875);}
     
 }
 
+
+//Draws the top 5 players, and the current player's score
 function drawScoreBoard(){
-    context.font = "25px Arial";
+    context.font = "Bold 25px Courier New";
     context.fillStyle = "#000000";
     context.fillText("" + cars[playerID].score, 0, 25);
 }
