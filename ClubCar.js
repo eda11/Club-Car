@@ -23,8 +23,8 @@ window.addEventListener("keyup", keyup_handler, false);
 var socket = io.connect();
 
 //The width and height of the background
-widthBackground = 2000
-heightBackground = 2000
+widthBackground = 4000
+heightBackground = 4000
 
 //Sets up varibles
 var playerID = -1;
@@ -299,7 +299,7 @@ class Car {
         if (this.angle < 0){this.angle += 2*Math.PI}
 
         //Checks if the car has collided with an object
-        if(this.checkObjectCollison(0,0,0,2000,2000,2000,2000,0)) this.objectCollide();
+        if(this.checkObjectCollison(0,0,0,4000,4000,4000,4000,0)) this.objectCollide();
 
         this.updateCorners();
     }
@@ -330,8 +330,8 @@ class VroomBuck{
     }
 
     move(){
-        this.x = Math.round(Math.random()*1980)+10
-        this.y = Math.round(Math.random()*1980)+10
+        this.x = Math.round(Math.random()*3960)+10
+        this.y = Math.round(Math.random()*3960)+10
         socket.emit("updateVroom",this.id,this.x,this.y);
     }
 }

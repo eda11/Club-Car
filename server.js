@@ -39,13 +39,13 @@ class VroomBuck{
     }
 
     move(){
-        this.x = Math.round(Math.random()*1980)+10
-        this.y = Math.round(Math.random()*1980)+10
+        this.x = Math.round(Math.random()*3960)+10
+        this.y = Math.round(Math.random()*3960)+10
     }
 }
 
 for(i = 0; i<100;i++){
-    VroomBuckList[i] = new VroomBuck(i,Math.round(Math.random()*1980)+10,Math.round(Math.random()*1980)+10);
+    VroomBuckList[i] = new VroomBuck(i,Math.round(Math.random()*3960)+10,Math.round(Math.random()*3960)+10);
 }
 
 var createPlayer = function(id) {
@@ -68,6 +68,12 @@ io.on("connection" , function(socket) {
     // we create an id that we assign to a player
     socket.id = playerCount;
     playerCount++;
+
+    socket.on("login" , function(username , hashPassword) {
+        console.log(username);
+        console.log(hashPassword);
+        socket.emit("start");
+    });
 
     // we add the new connected player to a list of all other current players
     socketList[socket.id] = socket;
@@ -103,7 +109,7 @@ io.on("connection" , function(socket) {
             socket.emit("move" , playerList[socket.id]);
         }
         else if(message.text === "!speedBoost") {
-            playerList[socket.id].score += 100
+            playerList[socket.id].score += 1000
             socket.emit("speed" , playerList[socket.id].score);
         }
         else {
