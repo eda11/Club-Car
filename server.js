@@ -2,11 +2,26 @@ var express = require("express");
 var app = express();
 var server = require("http").createServer(app);
 var io = require("socket.io")(server);
+var mysql = require("mysql");
+
+/*
+var con = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "",
+})
+
+con.connect(function(err) {
+    if (err) throw err;
+    console.log("Connected!");
+})
+*/
 
 app.get("/" , function(req , res) {
     res.sendFile(__dirname + "/ClubCar.html");
 });
-app.use(express.static("./"));
+app.use(express.static("public"));
+app.use(express.static(__dirname + "/"));
 
 var socketList = {};
 var playerList = {};
@@ -95,7 +110,7 @@ io.on("connection" , function(socket) {
     socket.on("updateVroom",function(id,x,y){
         VroomBuckList[id].update(x,y)
         socket.broadcast.emit("updateVroom",id,x,y)
-    })
+    });
 
     socket.on("sendMessage",function(message){
         if (message.text.length > 60) {message.text = message.text.substring(0, 60)}
@@ -113,7 +128,7 @@ io.on("connection" , function(socket) {
             socket.emit("speed" , playerList[socket.id].score);
         }
         else {
-            var newMessage = "Car" + socket.id + ":" + message.text;
+            var newMessage = "" + playerList[socket.id].playerID + ":" + message.text;
             socket.broadcast.emit("getMessage",newMessage);
         }
 
@@ -130,8 +145,6 @@ io.on("connection" , function(socket) {
     socket.on("test" , function() {
         console.log("pass");
     });
-
-    // function update()
 });
 
 /*
