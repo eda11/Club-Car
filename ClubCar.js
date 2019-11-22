@@ -481,11 +481,11 @@ socket.on("updateVroom",function(id,x,y){
 });
 
 function on() {
-    document.getElementById("overlay").style.display = "block";
-  }
-  
+  document.getElementById("overlay").style.display = "block";
+}
+
 function off() {
-    document.getElementById("overlay").style.display = "none";
+  document.getElementById("overlay").style.display = "none";
 }
 
 function keyup_handler(event) {

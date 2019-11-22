@@ -8,18 +8,42 @@
   </head>
   <script src="/socket.io/socket.io.js"></script>
   <body>
-    <div id="login">
-      Userame: <input type="text" id="username" value=""><br>
-      Password: <input type="password" id="password" value=""><br>
-      <button onclick="submit()">Enter</button>
-    </div>
+  
+
+
     <div id="clubCar">
       <canvas id="gameSpace" width="1800" height="900"></canvas>
       <script src="ClubCar.js"></script>
     </div>
-    <div id="overlay" onlick= "off">
-      <div id="text"></div>
+	
+	<button onclick="document.getElementById('id01').style.display='block'" id = "loginButton" style="width:auto;">Login </button>
+	
+	
+	<div id="id01" class="modal" >
+  
+
+    <div class="imgcontainer" id = "xButton">
+		<span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
     </div>
+
+    <div class="container" id = "login" >
+      <label for="username"><b>Username</b></label>
+      <input type="text" placeholder="Enter Username" id="username" value="" required>
+
+      <label for="password_"><b>Password</b></label>
+      <input type="password" placeholder="Enter Password" id="password" value="" required>
+        
+		<button onclick="submit()">login</button>
+    </div>
+
+	
+    <div class="container" style="background-color:#f1f1f1" id = "cancel">
+      <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+    </div>
+  </form>
+</div>
+
+     <div id="text"></div>
   </body>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </html>
@@ -41,6 +65,14 @@ socket.emit("test");
 
 socket.on("start" , function() {
   document.getElementById("login").style.display = "none";
+  document.getElementById("cancel").style.display = "none";
+  document.getElementById("xButton").style.display = "none";
+  document.getElementById("loginButton").style.display = "none";
+  document.getElementById("id01").style.display = "none";
   document.getElementById("clubCar").style.display = "initial";
 })
+
+var modal = document.getElementById('id01');
+
+
 </script>
