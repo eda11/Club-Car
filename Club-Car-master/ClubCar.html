@@ -1,0 +1,78 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <div class="container">
+	    <h2 class="rainbow">CLUB CAR</h2> 
+    </div>
+    <link rel='stylesheet' type='text/css' href='ClubCar.css'>
+  </head>
+  <script src="/socket.io/socket.io.js"></script>
+  <body>
+  
+
+
+    <div id="clubCar">
+      <canvas id="gameSpace" width="1800" height="900"></canvas>
+      <script src="ClubCar.js"></script>
+    </div>
+	
+	<button onclick="document.getElementById('id01').style.display='block'" id = "loginButton" style="width:auto;">Login </button>
+	
+	
+	<div id="id01" class="modal" >
+  
+
+    <div class="imgcontainer" id = "xButton">
+		<span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
+    </div>
+
+    <div class="container" id = "login" >
+      <label for="username"><b>Username</b></label>
+      <input type="text" placeholder="Enter Username" id="username" value="" required>
+
+      <label for="password_"><b>Password</b></label>
+      <input type="password" placeholder="Enter Password" id="password" value="" required>
+        
+		<button onclick="submit()">login</button>
+    </div>
+
+	
+    <div class="container" style="background-color:#f1f1f1" id = "cancel">
+      <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+    </div>
+  </form>
+</div>
+
+     <div id="text"></div>
+  </body>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</html>
+
+<script>
+function submit() {
+  hashPassword = hash(document.getElementById("password").value);
+  socket.emit("login" , document.getElementById("username").value , hashPassword);
+};
+
+function hash(text) {
+  hashKey = 0;
+    for(i = 0 ; i < text.length ; i++)
+    hashKey = 33*hashKey + text.charCodeAt(i);
+	return hashKey;
+}
+
+socket.emit("test");
+
+socket.on("start" , function() {
+  document.getElementById("login").style.display = "none";
+  document.getElementById("cancel").style.display = "none";
+  document.getElementById("xButton").style.display = "none";
+  document.getElementById("loginButton").style.display = "none";
+  document.getElementById("id01").style.display = "none";
+  document.getElementById("clubCar").style.display = "initial";
+})
+
+var modal = document.getElementById('id01');
+
+
+</script>
