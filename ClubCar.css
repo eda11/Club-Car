@@ -110,6 +110,14 @@ span.psw {
   font-size: 35px;
   font-weight: bold;
 }
+.welcomebox {
+  background-color: lightblue;
+  width: 300px;
+  border: 2px solid black;
+  text-align: center;
+  padding: 50px;
+  margin: auto;
+}
 
 .close:hover,
 .close:focus {
