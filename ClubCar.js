@@ -315,7 +315,7 @@ class VroomBuck{
     checkPickUp(car){
         if(car.checkObjectCollison(this.x-10,this.y-10,  this.x+10,this.y-10,  this.x+10,this.y+10,  this.x-10,this.y+10)){
             console.log("Collide");
-            car.score += 5;
+            car.score += 1;
             this.move();
         }
     }
