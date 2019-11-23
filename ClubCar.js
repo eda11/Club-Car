@@ -381,12 +381,23 @@ function drawChat(){
     
 }
 
+function updateScoreBoard(){
+    socket.emit("updateScore")
+}
 
 //Draws the top 5 players, and the current player's score
 function drawScoreBoard(){
     context.font = "Bold 25px Courier New";
     context.fillStyle = "#000000";
-    context.fillText("" + cars[playerID].score, 0, 25);
+    scoreBoard = cars.slice();
+    scoreBoard.sort(function(a, b){
+        return b.score - a.score;
+    });
+    for (var i = 0; i < 5; i++) {
+        if (i > scoreBoard.length -1 ){break;}
+        if (scoreBoard[i] == null){break;}
+        context.fillText(""+scoreBoard[i].score, 0, 25 + (i*25));
+    }
 }
 
 function updateSpeed(){
