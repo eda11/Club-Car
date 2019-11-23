@@ -12,8 +12,11 @@ img.src = "Sprites/CarTest.png";
 var vroomBuckImage = new Image();
 vroomBuckImage.src = "Sprites/VroomBuck.png"
 
+var scrapBuckImage = new Image();
+scrapBuckImage.src = "Sprites/ScrapBuck.png"
+
 var background = new Image();
-background.src = "Sprites/BackgroundTesr.png";
+background.src = "Sprites/Background.png";
 
 //Adds keylistners
 window.addEventListener("keydown", keypress_handler, false);
@@ -32,6 +35,7 @@ var cars = [];
 var chatLog = [];
 var scoreBoard = [];
 var VroomBuckList = [];
+scarpBuckList = [];
 
 var message = "";
 
@@ -328,6 +332,28 @@ class VroomBuck{
     }
 }
 
+class ScrapBuck{
+    constructor(id,x,y){
+        this.id = id;
+
+        this.x = x;
+        this.y = y;
+    }
+    draw(car,context){
+        car.drawOther(scrapBuckImage,0,this.x,this.y,0,0,context)
+    }
+
+    checkPickUp(car){
+        if(car.checkObjectCollison(this.x-10,this.y-10,  this.x+10,this.y-10,  this.x+10,this.y+10,  this.x-10,this.y+10)){
+            console.log("Collide");
+            car.score += 3;
+            return true;
+        }
+        return false;
+    }
+}
+
+
 var moveInterval = setInterval(function () {
     draw();
     cars[playerID].checkCarCollision();
@@ -335,6 +361,9 @@ var moveInterval = setInterval(function () {
     update();
 }, 15);
 
+function removeScrapBuck(index){
+    scarpBuckList.splice(index,1)
+}
 
 //Draw to the canvas
 function draw() {
@@ -348,6 +377,12 @@ function draw() {
     for(i in VroomBuckList){
         VroomBuckList[i].draw(cars[playerID], context);
         VroomBuckList[i].checkPickUp(cars[playerID]);
+    }
+    for(i in scarpBuckList){
+        scarpBuckList[i].draw(cars[playerID], context)
+        if(scarpBuckList[i].checkPickUp(cars[playerID])){
+            socket.emit("removeScrap",i);
+        }
     }
 
     //Draws cars
@@ -416,10 +451,11 @@ function update() {
 }
 
 // we iterate through a list of given players
-socket.on("initialize" , function(id , data, vrooms) {
+socket.on("initialize" , function(id , data, vrooms,scraps) {
     playerID = id;
     for(i in vrooms) VroomBuckList[i] = new VroomBuck(vrooms[i].id,vrooms[i].x,vrooms[i].y);
-    console.log(VroomBuckList);
+    for(i in scraps) scarpBuckList[i] = new ScrapBuck(scraps[i].id,scraps[i].x,scraps[i].y);
+    console.log(scarpBuckList);
     // create the cars
     for(i in data) {
         cars[data[i].playerID] = new Car(data[i].playerID , data[i].score , data[i].x , data[i].y , data[i].angle , "Sprites/CarTest.png");
@@ -481,6 +517,11 @@ socket.on("updateVroom",function(id,x,y){
     VroomBuckList[id].update(x,y);
 });
 
+socket.on("removeScrap",function(id){
+    console.log("NOOOOOOOOOOOOOOO")
+    removeScrapBuck(id);
+})
+
 function on() {
   document.getElementById("overlay").style.display = "block";
 }
@@ -501,7 +542,6 @@ function keyup_handler(event) {
 }
 
 function keypress_handler(event) {
-
     if (!typing) {
             //W (Forwards)
         if (event.keyCode == 87) {
