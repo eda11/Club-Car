@@ -13,7 +13,7 @@ var vroomBuckImage = new Image();
 vroomBuckImage.src = "Sprites/VroomBuck.png"
 
 var background = new Image();
-background.src = "Sprites/Background.png";
+background.src = "Sprites/BackgroundTesr.png";
 
 //Adds keylistners
 window.addEventListener("keydown", keypress_handler, false);
@@ -23,8 +23,8 @@ window.addEventListener("keyup", keyup_handler, false);
 var socket = io.connect();
 
 //The width and height of the background
-widthBackground = 4000
-heightBackground = 4000
+widthBackground = 9000
+heightBackground = 9000
 
 //Sets up varibles
 var playerID = -1;
@@ -388,6 +388,7 @@ function drawScoreBoard(){
     context.fillStyle = "#000000";
     context.fillText("" + cars[playerID].score, 0, 25);
 }
+
 
 function updateSpeed(){
     for(i in cars) {
