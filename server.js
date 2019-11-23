@@ -128,7 +128,7 @@ io.on("connection" , function(socket) {
             socket.emit("speed" , playerList[socket.id].score);
         }
         else {
-            var newMessage = "" + playerList[socket.id].playerID + ":" + message.text;
+            var newMessage = "Car" + playerList[socket.id].playerID + ":" + message.text;
             socket.broadcast.emit("getMessage",newMessage);
         }
 
