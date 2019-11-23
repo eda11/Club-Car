@@ -171,6 +171,12 @@ class Car {
         var thisSpeed = (this.speedX*this.speedX) + (this.speedY*this.speedY)
         var carSpeed = (car.speedX*car.speedX) + (car.speedY*car.speedY)
 
+        if (thisSpeed < carSpeed){
+            var removed = Math.round(this.score/2);
+            this.score -= removed
+            socket.emit("newScrap",this.x,this.y,Math.round(removed/5));
+        }
+
         //Calculates the forces of the collision
         var fx = (-0.5 * (car.x - this.x));
         var fy = (-0.5 * (car.y - this.y));
@@ -529,8 +535,12 @@ socket.on("updateVroom",function(id,x,y){
 });
 
 socket.on("removeScrap",function(id){
-    console.log("NOOOOOOOOOOOOOOO")
     removeScrapBuck(id);
+})
+
+socket.on("updateScrap",function(scraps){
+    scarpBuckList = [];
+    for(i in scraps) scarpBuckList[i] = new ScrapBuck(scraps[i].id,scraps[i].x,scraps[i].y);
 })
 
 function on() {

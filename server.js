@@ -53,12 +53,14 @@ class ScrapBuck{
     }
 }
 
-for(i = 0; i<100;i++){
-    VroomBuckList[i] = new VroomBuck(i,Math.round(Math.random()*3960)+10,Math.round(Math.random()*3960)+10);
+function makeScrap(x,y,amount){
+    for(i =0;i<amount;i++){
+        scrapBuckList.push(new ScrapBuck(i,x+Math.round(Math.random()*60),y+Math.round(Math.random()*60)))
+    }
 }
 
-for(i=0;i<20;i++){
-    scrapBuckList.push(new ScrapBuck(i,i*50,100))
+for(i = 0; i<100;i++){
+    VroomBuckList[i] = new VroomBuck(i,Math.round(Math.random()*3960)+10,Math.round(Math.random()*3960)+10);
 }
 
 var createPlayer = function(id) {
@@ -148,17 +150,13 @@ io.on("connection" , function(socket) {
     socket.on("test" , function() {
         console.log("pass");
     });
+
+    socket.on("newScrap",function(x,y,amount){
+        makeScrap(x,y,amount);
+        socket.broadcast.emit("updateScrap",scrapBuckList);
+    })
 });
 
-/*
-setInterval(function() {
-    // recieve player positions
-    // assign new position to servers objects
-    // emit the array of players to all users
-
-    // socket.emit("update" , playerList);
-} , 25);
-*/
 server.listen(3000 , function() {
     console.log("listening on localhost:3000");
 });
