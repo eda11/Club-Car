@@ -35,7 +35,8 @@ var cars = [];
 var chatLog = [];
 var scoreBoard = [];
 var VroomBuckList = [];
-scarpBuckList = [];
+var scarpBuckList = [];
+var logged = false;
 
 var message = "";
 
@@ -363,12 +364,69 @@ class ScrapBuck{
     }
 }
 
+// functions used for logging in
+
+function login() {
+    hashPassword = hash(document.getElementById("password01").value);
+    socket.emit("login" , document.getElementById("username01").value , hashPassword);
+};
+  
+function createAcc() {
+    hashPassword = hash(document.getElementById("password02").value);
+    hashRePassword = hash(document.getElementById("rePassword").value);
+    reCAPTCHA = grecaptcha.getResponse();
+    socket.emit("createAcc" , document.getElementById("username02").value , hashPassword , hashRePassword , reCAPTCHA);
+};
+  
+function hash(text) {
+    hashKey = 0;
+        for(i = 0 ; i < text.length ; i++)
+        hashKey = 33*hashKey + text.charCodeAt(i);
+        return hashKey;
+};
+  
+socket.on("errorMsg" , function(msg , label) {
+    document.getElementById("error"+label).style.display = "initial";
+    document.getElementById("error"+label).style.color = "red";
+    document.getElementById("error"+label).innerHTML = "<b>"+msg+"</b>";
+});
+  
+  
+socket.on("start" , function() {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("cancel").style.display = "none";
+    document.getElementById("xButton").style.display = "none";
+    document.getElementById("loginButton").style.display = "none";
+    document.getElementById("createAccButton").style.display = "none";
+    document.getElementById("id01").style.display = "none";
+    document.getElementById("id02").style.display = "none";
+    document.getElementById("welcomeBox").style.display = "none";
+    document.getElementById("clubCar").style.display = "initial";
+    start();
+});
+
+var modal1 = document.getElementById('id01');
+var modal2 = document.getElementById('id02');
+
+
+
+// We want to ensure there isn't any data about car's being sent until the user has logged in
+function start() {
+    socket.emit("start");
+    var moveInterval = setInterval(function () {
+        draw();
+        cars[playerID].checkCarCollision();
+        updateSpeed();
+        update();
+    }, 15);
+}
 
 var moveInterval = setInterval(function () {
     draw();
     cars[playerID].checkCarCollision();
     updateSpeed();
 }, 15);
+// functions used for the game
 
 function removeScrapBuck(index){
     scarpBuckList.splice(index,1)
