@@ -325,21 +325,13 @@ class VroomBuck{
 
     checkPickUp(car){
         if(car.checkObjectCollison(this.x-10,this.y-10,  this.x+10,this.y-10,  this.x+10,this.y+10,  this.x-10,this.y+10)){
-            console.log("Collide");
-            car.score += 1;
-            this.move();
+            socket.emit("updateVroom",this.id,car.id);
         }
     }
 
     update(x,y){
         this.x = x;
         this.y = y;
-    }
-
-    move(){
-        this.x = Math.round(Math.random()*3960)+10
-        this.y = Math.round(Math.random()*3960)+10
-        socket.emit("updateVroom",this.id,this.x,this.y);
     }
 }
 
@@ -356,8 +348,6 @@ class ScrapBuck{
 
     checkPickUp(car){
         if(car.checkObjectCollison(this.x-10,this.y-10,  this.x+10,this.y-10,  this.x+10,this.y+10,  this.x-10,this.y+10)){
-            console.log("Collide");
-            car.score += 3;
             return true;
         }
         return false;
@@ -573,6 +563,11 @@ socket.on("update" , function(data) {
     cars[data.playerID].angleMod = data.angleMod;
     }
 });
+
+socket.on("UpdateScore", function(id,score){
+    console.log(score);
+    cars[id].score = score;
+})
 
 socket.on("move" , function(data) {
     cars[playerID].x = data.x;
