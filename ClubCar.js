@@ -69,6 +69,9 @@ class Car {
         this.tempSpeedX = 0;
         this.tempSpeedY = 0;
 
+        this.speedMod = 0;
+        this.angleMod = 0;
+
         //This contains the angle and image of the car
         this.angle = angle;
         this.img = new Image();
@@ -212,6 +215,7 @@ class Car {
             this.speedX += this.collisionX;
             this.speedY += this.collisionY;
             this.angleSpeed += this.collisionAngle;
+            update();
         }
     }
     checkObjectCollison(x1,y1,x2,y2,x3,y3,x4,y4){
@@ -269,7 +273,7 @@ class Car {
         context.restore();
     }
 
-    calculateSpeed(speedMod,angleMod){
+    calculateSpeed(){
 
         //Handles collisions with other cars
         if(this.collisionDelay > 0) this.collisionDelay--;
@@ -282,9 +286,9 @@ class Car {
         this.maxSpeed = 6 + 0.02*this.score;
 
         //Increase the speed in the correct direction
-        this.angleSpeed += angleMod*0.005;
-        this.speedX += this.accelaration*Math.cos(this.angle)*speedMod; 
-        this.speedY += this.accelaration*Math.sin(this.angle)*speedMod;
+        this.angleSpeed += this.angleMod*0.005;
+        this.speedX += this.accelaration*Math.cos(this.angle)*this.speedMod; 
+        this.speedY += this.accelaration*Math.sin(this.angle)*this.speedMod;
 
         //Decrease the speeds by the friction
         this.angleSpeed = Approach(this.angleSpeed,0,0.005*Math.abs(this.angleSpeed/0.06))
@@ -364,7 +368,6 @@ var moveInterval = setInterval(function () {
     draw();
     cars[playerID].checkCarCollision();
     updateSpeed();
-    update();
 }, 15);
 
 function removeScrapBuck(index){
@@ -445,9 +448,9 @@ function drawScoreBoard(){
 function updateSpeed(){
     for(i in cars) {
         if(i == playerID) {
-            cars[playerID].calculateSpeed(mod , angleMod);
+            cars[playerID].calculateSpeed();
         } else {
-            cars[i].calculateSpeed(0 , 0);
+            cars[i].calculateSpeed();
         }
     }
 }
@@ -463,6 +466,8 @@ function update() {
         speedY: cars[playerID].speedY,
         angle: cars[playerID].angle,
         angleSpeed: cars[playerID].angleSpeed,
+        speedMod: cars[playerID].speedMod,
+        angleMod: cars[playerID].angleMod,
     }
     socket.emit("update" , update);
 }
@@ -511,6 +516,8 @@ socket.on("update" , function(data) {
     cars[data.playerID].speedY = data.speedY;
     cars[data.playerID].angle = data.angle;
     cars[data.playerID].angleSpeed = data.angleSpeed;
+    cars[data.playerID].speedMod = data.speedMod;
+    cars[data.playerID].angleMod = data.angleMod;
 });
 
 socket.on("move" , function(data) {
@@ -554,11 +561,13 @@ function off() {
 function keyup_handler(event) {
     //W or S (forwards or reverse)
     if (event.keyCode == 87 || event.keyCode == 83) {
-        mod = 0;
+        cars[playerID].speedMod = 0;
+        update();
     }
     //A or D (turn left or right)
     if (event.keyCode == 65 || event.keyCode == 68) {
-        angleMod = 0;
+        cars[playerID].angleMod = 0;
+        update();
     } 
 }
 
@@ -566,19 +575,24 @@ function keypress_handler(event) {
     if (!typing) {
             //W (Forwards)
         if (event.keyCode == 87) {
-            mod = 1;
+            cars[playerID].speedMod = 1;
+            update();
         }
         //S (Reverse)
         if (event.keyCode == 83) {
-            mod = -0.6;
+            cars[playerID].speedMod = -0.6;
+            update();
         }
         //A (Turn left)
         if (event.keyCode == 65) {
-            angleMod = -1;
+            cars[playerID].angleMod = -1;
+            update();
         }
         //D (Turn right)
         if (event.keyCode == 68) {
-            angleMod = 1;
+            cars[playerID].angleMod = 1;
+            update();
+
         }
 
         //Enter (start message)

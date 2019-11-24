@@ -4,7 +4,6 @@ var server = require("http").createServer(app);
 var io = require("socket.io")(server);
 var mysql = require("mysql");
 
-
 var con = mysql.createConnection({
     host: "localhost",
     user: "root",
@@ -15,22 +14,9 @@ var con = mysql.createConnection({
 })
 
 con.connect(function(err) {
-    if (err) throw err;
+    //if (err) console.log(err);
     console.log("Connected!");
-    //Uncomment to make the database
-    //con.query("CREATE DATABASE ClubCar", function (err, result) {
-        //if (err) throw err;
-        //console.log("Database created");
-    //})
-
-    //Uncomment to make the table
-    //var sql = "CREATE TABLE Users (userName varchar(20),vroomBuck int,hashedPassword varchar(20),posX int,posY int,logged boolean,PRIMARY KEY (userName))";
-    //con.query(sql, function (err, result) {
-        //if (err) throw err;
-        //console.log("Table created");
-    //});
 })
-
 
 app.get("/" , function(req , res) {
     res.sendFile(__dirname + "/ClubCar.html");
@@ -89,6 +75,8 @@ var createPlayer = function(id) {
         speedY: 0,
         angle: 0,
         angleSpeed: 0,
+        speedMod: 0,
+        angleMod: 0,
     }
     return player;
 }
@@ -135,7 +123,8 @@ function createAccChecks(username , hashPassword , hashRePassword , reCAPTCHA) {
 
     var continuationCode = "";
 
-    con.query("select 1 from Users where userName  = '" + username + "'", function(err, result) {
+    con.query("SELECT * FROM Users WHERE userName  = 'ben'", function(err, result,fields) {
+        //con.release();
         if (err) throw err;
         console.log(result);
         if (result.length > 0) {continuationCode = "Username is already in use"}
