@@ -362,6 +362,7 @@ class ScrapBuck{
             }
             return false;
         }
+        return false;
     }
 }
 
