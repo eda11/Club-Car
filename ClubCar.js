@@ -12,6 +12,9 @@ img.src = "Sprites/CarTest.png";
 var vroomBuckImage = new Image();
 vroomBuckImage.src = "Sprites/VroomBuck.png"
 
+var scrapBuckImage = new Image();
+scrapBuckImage.src = "Sprites/ScrapBuck.png"
+
 var background = new Image();
 background.src = "Sprites/Background.png";
 
@@ -23,8 +26,8 @@ window.addEventListener("keyup", keyup_handler, false);
 var socket = io.connect();
 
 //The width and height of the background
-widthBackground = 4000
-heightBackground = 4000
+widthBackground = 9000
+heightBackground = 9000
 
 //Sets up varibles
 var playerID = -1;
@@ -32,6 +35,7 @@ var cars = [];
 var chatLog = [];
 var scoreBoard = [];
 var VroomBuckList = [];
+scarpBuckList = [];
 
 var message = "";
 
@@ -166,6 +170,12 @@ class Car {
 
         var thisSpeed = (this.speedX*this.speedX) + (this.speedY*this.speedY)
         var carSpeed = (car.speedX*car.speedX) + (car.speedY*car.speedY)
+
+        if (thisSpeed < carSpeed){
+            var removed = Math.round(this.score/2);
+            this.score -= removed
+            socket.emit("newScrap",this.x,this.y,Math.round(removed/5));
+        }
 
         //Calculates the forces of the collision
         var fx = (-0.5 * (car.x - this.x));
@@ -311,7 +321,7 @@ class VroomBuck{
     checkPickUp(car){
         if(car.checkObjectCollison(this.x-10,this.y-10,  this.x+10,this.y-10,  this.x+10,this.y+10,  this.x-10,this.y+10)){
             console.log("Collide");
-            car.score += 5;
+            car.score += 1;
             this.move();
         }
     }
@@ -328,6 +338,28 @@ class VroomBuck{
     }
 }
 
+class ScrapBuck{
+    constructor(id,x,y){
+        this.id = id;
+
+        this.x = x;
+        this.y = y;
+    }
+    draw(car,context){
+        car.drawOther(scrapBuckImage,0,this.x,this.y,0,0,context)
+    }
+
+    checkPickUp(car){
+        if(car.checkObjectCollison(this.x-10,this.y-10,  this.x+10,this.y-10,  this.x+10,this.y+10,  this.x-10,this.y+10)){
+            console.log("Collide");
+            car.score += 3;
+            return true;
+        }
+        return false;
+    }
+}
+
+
 var moveInterval = setInterval(function () {
     draw();
     cars[playerID].checkCarCollision();
@@ -335,6 +367,9 @@ var moveInterval = setInterval(function () {
     update();
 }, 15);
 
+function removeScrapBuck(index){
+    scarpBuckList.splice(index,1)
+}
 
 //Draw to the canvas
 function draw() {
@@ -348,6 +383,12 @@ function draw() {
     for(i in VroomBuckList){
         VroomBuckList[i].draw(cars[playerID], context);
         VroomBuckList[i].checkPickUp(cars[playerID]);
+    }
+    for(i in scarpBuckList){
+        scarpBuckList[i].draw(cars[playerID], context)
+        if(scarpBuckList[i].checkPickUp(cars[playerID])){
+            socket.emit("removeScrap",i);
+        }
     }
 
     //Draws cars
@@ -381,13 +422,25 @@ function drawChat(){
     
 }
 
+function updateScoreBoard(){
+    socket.emit("updateScore")
+}
 
 //Draws the top 5 players, and the current player's score
 function drawScoreBoard(){
     context.font = "Bold 25px Courier New";
     context.fillStyle = "#000000";
-    context.fillText("" + cars[playerID].score, 0, 25);
+    scoreBoard = cars.slice();
+    scoreBoard.sort(function(a, b){
+        return b.score - a.score;
+    });
+    for (var i = 0; i < 5; i++) {
+        if (i > scoreBoard.length -1 ){break;}
+        if (scoreBoard[i] == null){break;}
+        context.fillText(""+scoreBoard[i].score, 0, 25 + (i*25));
+    }
 }
+
 
 function updateSpeed(){
     for(i in cars) {
@@ -415,10 +468,11 @@ function update() {
 }
 
 // we iterate through a list of given players
-socket.on("initialize" , function(id , data, vrooms) {
+socket.on("initialize" , function(id , data, vrooms,scraps) {
     playerID = id;
     for(i in vrooms) VroomBuckList[i] = new VroomBuck(vrooms[i].id,vrooms[i].x,vrooms[i].y);
-    console.log(VroomBuckList);
+    for(i in scraps) scarpBuckList[i] = new ScrapBuck(scraps[i].id,scraps[i].x,scraps[i].y);
+    console.log(scarpBuckList);
     // create the cars
     for(i in data) {
         cars[data[i].playerID] = new Car(data[i].playerID , data[i].score , data[i].x , data[i].y , data[i].angle , "Sprites/CarTest.png");
@@ -480,6 +534,15 @@ socket.on("updateVroom",function(id,x,y){
     VroomBuckList[id].update(x,y);
 });
 
+socket.on("removeScrap",function(id){
+    removeScrapBuck(id);
+})
+
+socket.on("updateScrap",function(scraps){
+    scarpBuckList = [];
+    for(i in scraps) scarpBuckList[i] = new ScrapBuck(scraps[i].id,scraps[i].x,scraps[i].y);
+})
+
 function on() {
   document.getElementById("overlay").style.display = "block";
 }
@@ -500,7 +563,6 @@ function keyup_handler(event) {
 }
 
 function keypress_handler(event) {
-
     if (!typing) {
             //W (Forwards)
         if (event.keyCode == 87) {

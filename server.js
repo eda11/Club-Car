@@ -27,6 +27,7 @@ var socketList = {};
 var playerList = {};
 var playerCount = 0;
 var VroomBuckList = [];
+var scrapBuckList = [];
 var chatLog = {};
 
 class VroomBuck{
@@ -36,26 +37,25 @@ class VroomBuck{
         this.x = x;
         this.y = y;
     }
-    draw(car,context){
-        car.drawOther(vroomBuckImage,0,this.x,this.y,0,0,context)
-    }
-
-    checkPickUp(car){
-        if(car.checkObjectCollison(this.x-10,this.y-10,  this.x+10,this.y-10,  this.x+10,this.y+10,  this.x-10,this.y+10)){
-            console.log("Collide");
-            car.score += 5;
-            this.move();
-        }
-    }
 
     update(x,y){
         this.x = x;
         this.y = y;
     }
+}
 
-    move(){
-        this.x = Math.round(Math.random()*3960)+10
-        this.y = Math.round(Math.random()*3960)+10
+class ScrapBuck{
+    constructor(id,x,y){
+        this.id = id;
+
+        this.x = x;
+        this.y = y;
+    }
+}
+
+function makeScrap(x,y,amount){
+    for(i =0;i<amount;i++){
+        scrapBuckList.push(new ScrapBuck(i,x+Math.round(Math.random()*60),y+Math.round(Math.random()*60)))
     }
 }
 
@@ -143,7 +143,7 @@ io.on("connection" , function(socket) {
     playerList[socket.id] = player;
     socket.broadcast.emit("getMessage","Car" + socket.id + " Has Connected!");
 
-    socket.emit("initialize" , socket.id , playerList , VroomBuckList);
+    socket.emit("initialize" , socket.id , playerList , VroomBuckList,scrapBuckList);
     socket.broadcast.emit("addPlayer" , playerList[socket.id]);
 
     socket.on("update" , function(data) {
@@ -157,6 +157,11 @@ io.on("connection" , function(socket) {
     socket.on("updateVroom",function(id,x,y){
         VroomBuckList[id].update(x,y)
         socket.broadcast.emit("updateVroom",id,x,y)
+    });
+
+    socket.on("removeScrap",function(id){
+        scrapBuckList.splice(id,1);
+        socket.broadcast.emit("removeScrap",id);
     });
 
     socket.on("sendMessage",function(message){
@@ -175,7 +180,7 @@ io.on("connection" , function(socket) {
             socket.emit("speed" , playerList[socket.id].score);
         }
         else {
-            var newMessage = "" + playerList[socket.id].playerID + ":" + message.text;
+            var newMessage = "Car" + playerList[socket.id].playerID + ":" + message.text;
             socket.broadcast.emit("getMessage",newMessage);
         }
 
@@ -192,18 +197,12 @@ io.on("connection" , function(socket) {
     socket.on("test" , function() {
         console.log("pass");
     });
+
+    socket.on("newScrap",function(x,y,amount){
+        makeScrap(x,y,amount);
+        socket.broadcast.emit("updateScrap",scrapBuckList);
+    })
 });
-
-/*
-setInterval(function() {
-    // recieve player positions
-    // assign new position to servers objects
-    // emit the array of players to all users
-
-    // socket.emit("update" , playerList);
-} , 25);
-*/
-
 
 server.listen(3000 , function() {
     console.log("listening on localhost:3000");
