@@ -3,6 +3,7 @@ var app = express();
 var server = require("http").createServer(app);
 var io = require("socket.io")(server);
 var mysql = require("mysql");
+const util = require('util');
 
 
 var con = mysql.createConnection({
@@ -108,15 +109,24 @@ function getFromTable(query) {
 }
 
 function checkUserName(username) {
-    //con.query("select * from Users");
-    //console.log(result);
-    //if (result !== []){return "Username already in use"}
-    con.query("select * from Users where userName  = '" + username + "'", function(err, result) {
-        if (err) throw err;
-        console.log(result);
-        if (result !== []) {return "Username is already in use"}
-        return "";
-    })
+    //con.query("select * from Users where userName  = '" + username + "'", function(err, result) {
+        //if (err) throw err;
+        //console.log(result);
+        //if (result.length > 0) {return "Username is already in use"}
+        //return "";
+    //})
+    try {
+        console.log("Tried to check")
+        //const result = await con.query("select 1 from Users where userName  = '" + username + "'");
+        con.query("select * from Users where userName  = '" + username + "'", function(err, result) {
+            if (err) throw err;
+            console.log(result);
+            if (result.length > 0) {return "Username is already in use"}
+            return "";
+        })
+    } catch (err) {
+        console.log("HELPHEKPKSALFHASADFILHSDFHIL");
+    }
 }
 
 function createAccChecks(username , hashPassword , hashRePassword , reCAPTCHA) {
@@ -133,13 +143,9 @@ function createAccChecks(username , hashPassword , hashRePassword , reCAPTCHA) {
         return "reCAPTCHA uncomplete"
     }
 
-    var continuationCode = "";
+    var continuationCode = null;
 
-    con.query("select 1 from Users where userName  = '" + username + "'", function(err, result) {
-        if (err) throw err;
-        console.log(result);
-        if (result.length > 0) {continuationCode = "Username is already in use"}
-    })
+    continuationCode = checkUserName(username);
 
     return continuationCode;
 };
