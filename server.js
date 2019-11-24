@@ -133,39 +133,15 @@ function createAccChecks(username , hashPassword , hashRePassword , reCAPTCHA) {
         return "reCAPTCHA uncomplete"
     }
 
-    //con.query("select * from Users where userName  = '" + username + "'", function(err, result) {
-        //if (err) throw err;
-        //console.log(result);
-        //if (result !== []) {return "Username is already in use"}
-    //})
+    var continuationCode = "";
 
     con.query("select 1 from Users where userName  = '" + username + "'", function(err, result) {
         if (err) throw err;
         console.log(result);
-        if (result.length > 0) {return "Username is already in use"}
+        if (result.length > 0) {continuationCode = "Username is already in use"}
     })
 
-    return "";
-    
-    //let result = checkUserName(username);
-    //console.log(result);
-    //return result;
-
-    //console.log("###-GOT-HERE-###")
-    //console.log("select * from Users where userName  = '" + username + "'");
-    //var result = con.query("select * from Users where userName  = '" + username + "'");
-    //console.log("###-GOT-HERE-TOO-###")
-    //if (result.err) throw result.err
-    //console.log(result);
-    //if (result != []){return "Username already in use"}
-    //console.log("continuing");
-    //var sql = "insert into Users (userName, vroomBuck, hashedPassword, posX, posY, logged) VALUES ?";
-    //var values = [username,0,hashPassword,500,500,false];
-    //console.log(sql);
-    //console.log(values);
-    //var newResult = con.query(sql, [values]);
-    //console.log(newResult);
-
+    return continuationCode;
 };
 
 function createAccount(username, hashPassword) {
