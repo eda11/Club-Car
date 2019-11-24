@@ -6,92 +6,79 @@
     </div>
     <link rel='stylesheet' type='text/css' href='ClubCar.css'>
   </head>
+
   <script src="/socket.io/socket.io.js"></script>
+
   <body>
   
-
-
-	<div class ="welcomebox"> Welcome to Club Car! 
-		<button onclick="document.getElementById('id01').style.display='block'" id = "loginButton" style="width:auto;">Login </button>
-	</div>
+	  <div id="welcomeBox"> Welcome to Club Car! <br>
+      <button onclick="document.getElementById('id01').style.display='block'" id = "loginButton" style="width:auto;">Login </button>
+      <button onclick="document.getElementById('id02').style.display='block'" id = "createAccButton" style="width:auto;">Create an Account </button>
+  	</div>
 	
     <div id="clubCar">
       <canvas id="gameSpace" width="1800" height="900"></canvas>
       <script src="ClubCar.js"></script>
     </div>
 	
-<<<<<<< HEAD
-	<button onclick="document.getElementById('id01').style.display='block'" id = "loginButton" style="width:auto;">Login </button>
-	<button onclick="document.getElementById('id02').style.display='block'" id = "createAccButton" style="width:auto;">Create an Account </button>
-=======
-	
-	
+	  <div id="id01" class="modal" >
+
+      <div class="imgcontainer" id = "xButton">
+		    <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
+      </div>
+
+      <div class="container" id = "login" >
+
+        <label for="username"><b>Username</b></label>
+        <input type="text" placeholder="Enter Username" id="username01" value="" required>
+
+        <label for="password_"><b>Password</b></label>
+        <input type="password" placeholder="Enter Password" id="password01" value="" required>
+
+        <label class="errors" id="error01"><b>defualt</b></label>
+
+		    <button onclick="login()">login</button>
+      </div>
 
 	
->>>>>>> db15ffa08ea890230f09b124e48ef0a12d4e8be2
-	
-	<div id="id01" class="modal" >
+      <div class="container" style="background-color:#f1f1f1" id = "cancel">
+        <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+      </div>
+    </div>
+
+    <div id="id02" class="modal" >
   
+      <div class="imgcontainer" id = "xButton">
+		    <span onclick="document.getElementById('id02').style.display='none'" class="close" title="Close Modal">&times;</span>
+      </div>
 
-    <div class="imgcontainer" id = "xButton">
-		<span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
-    </div>
+      <div class="container" id = "newAcc" >
 
-    <div class="container" id = "login" >
+        <label for="username"><b>Username</b></label>
+        <input type="text" placeholder="Enter Username" id="username02" value="" required>
 
-      <label for="username"><b>Username</b></label>
-      <input type="text" placeholder="Enter Username" id="username01" value="" required>
+        <label for="password_"><b>Password</b></label>
+        <input type="password" placeholder="Enter Password" id="password02" value="" required>
 
-      <label for="password_"><b>Password</b></label>
-      <input type="password" placeholder="Enter Password" id="password01" value="" required>
+        <label for="rePassword_"><b>Confirm Password</b></label>
+        <input type="password" placeholder="Confirm Password" id="rePassword" value="" required>
 
-      <label class="errors" id="error01"><b>defualt</b></label>
+        <label for="reCAPTCHA"><b>reCAPTCHA</b></label>
+        <script src='https://www.google.com/recaptcha/api.js'></script>
+        <div class="g-recaptcha" data-sitekey="6LcLRsQUAAAAAGkx0Al89Sn6xqB5Rwd2m-x2cU0Q"></div>
 
-		  <button onclick="login()">login</button>
-    </div>
-
-	
-    <div class="container" style="background-color:#f1f1f1" id = "cancel">
-      <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
-    </div>
-  </form>
-  </div>
-
-  <div id="id02" class="modal" >
-  
-
-    <div class="imgcontainer" id = "xButton">
-		<span onclick="document.getElementById('id02').style.display='none'" class="close" title="Close Modal">&times;</span>
-    </div>
-
-    <div class="container" id = "newAcc" >
-
-      <label for="username"><b>Username</b></label>
-      <input type="text" placeholder="Enter Username" id="username02" value="" required>
-
-      <label for="password_"><b>Password</b></label>
-      <input type="password" placeholder="Enter Password" id="password02" value="" required>
-
-      <label for="rePassword_"><b>Confirm Password</b></label>
-      <input type="password" placeholder="Confirm Password" id="rePassword" value="" required>
-
-      <label for="reCAPTCHA"><b>reCAPTCHA</b></label>
-      <script src='https://www.google.com/recaptcha/api.js'></script>
-      <div class="g-recaptcha" data-sitekey="6LcLRsQUAAAAAGkx0Al89Sn6xqB5Rwd2m-x2cU0Q"></div>
-
-      <label class="errors" id="error02"><b>defualt</b></label>
+        <label class="errors" id="error02"><b>defualt</b></label>
         
-		  <button onclick="createAcc()">Create Account</button>
-    </div>
+		    <button onclick="createAcc()">Create Account</button>
+      </div>
 
 	
-    <div class="container" style="background-color:#f1f1f1" id = "cancel">
-      <button type="button" onclick="document.getElementById('id02').style.display='none'" class="cancelbtn">Cancel</button>
+      <div class="container" style="background-color:#f1f1f1" id = "cancel">
+        <button type="button" onclick="document.getElementById('id02').style.display='none'" class="cancelbtn">Cancel</button>
+      </div>
     </div>
-  </form>
-  </div>
 
-     <div id="text"></div>
+    <div id="text"></div>
   </body>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </html>
@@ -131,6 +118,7 @@ socket.on("start" , function() {
   document.getElementById("createAccButton").style.display = "none";
   document.getElementById("id01").style.display = "none";
   document.getElementById("id02").style.display = "none";
+  document.getElementById("welcomeBox").style.display = "none";
   document.getElementById("clubCar").style.display = "initial";
 });
 

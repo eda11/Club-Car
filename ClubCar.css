@@ -112,7 +112,7 @@ span.psw {
   font-size: 35px;
   font-weight: bold;
 }
-.welcomebox {
+#welcomebox {
   background-color: lightblue;
   width: 300px;
   border: 2px solid black;
