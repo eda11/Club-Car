@@ -93,17 +93,64 @@ var createPlayer = function(id) {
     return player;
 }
 
+function loginChecks(username , hashPassword) {
+    if(username === "") {
+        return "Username is empty";
+    };
+    if(hashPassword == 0) {
+        return "Password is empty";
+    };
+    return "";
+};
+
+function createAccChecks(username , hashPassword , hashRePassword , reCAPTCHA) {
+    if(username === "") {
+        return "Username is empty";
+    };
+    if(hashPassword == 0) {
+        return "Password is empty";
+    };
+    if(hashPassword != hashRePassword) {
+        return "Passwords are not equal";
+    }
+    if(reCAPTCHA.length == 0) {
+        return "reCAPTCHA uncomplete"
+    }
+    return "";
+};
+
 io.on("connection" , function(socket) {
     console.log("connected");
-    // we create an id that we assign to a player
-    socket.id = playerCount;
-    playerCount++;
 
     socket.on("login" , function(username , hashPassword) {
         console.log(username);
         console.log(hashPassword);
-        socket.emit("start");
+        txt = loginChecks(username , hashPassword);
+        if(txt === "") {
+            socket.emit("start");
+        }
+        else {
+            socket.emit("errorMsg" , txt , "01");
+        }
     });
+
+    socket.on("createAcc" , function(username , hashPassword , hashRePassword , reCAPTCHA) {
+        console.log(username);
+        console.log(hashPassword);
+        console.log(hashRePassword);
+        console.log(reCAPTCHA.length);
+        txt = createAccChecks(username , hashPassword , hashRePassword , reCAPTCHA);
+        if(txt === "") {
+            socket.emit("start");
+        }
+        else {
+            socket.emit("errorMsg" , txt , "02");
+        }
+    });
+
+    // we create an id that we assign to a player
+    socket.id = playerCount;
+    playerCount++;
 
     // we add the new connected player to a list of all other current players
     socketList[socket.id] = socket;

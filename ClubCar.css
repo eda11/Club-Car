@@ -20,7 +20,9 @@ canvas {
   position: relative;
   z-index: 2;
 }
-
+.errors {
+  display: none;
+}
 
 html, body{
   min-height: 100%;
