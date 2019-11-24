@@ -271,7 +271,7 @@ io.on("connection" , function(socket) {
     socket.on("newScrap",function(x,y,amount){
         makeScrap(x,y,amount);
         socket.broadcast.emit("updateScrap",scrapBuckList);
-    })
+    });
 });
 
 server.listen(3000 , function() {

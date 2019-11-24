@@ -397,6 +397,7 @@ socket.on("start" , function() {
     document.getElementById("id01").style.display = "none";
     document.getElementById("id02").style.display = "none";
     document.getElementById("welcomeBox").style.display = "none";
+    document.getElementById("rules").style.display = "none";
     document.getElementById("clubCar").style.display = "initial";
     logged = true;
     start();

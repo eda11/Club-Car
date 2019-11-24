@@ -120,6 +120,9 @@ span.psw {
   padding: 50px;
   margin: auto;
 }
+#rules {
+  text-align: center;
+}
 
 .close:hover,
 .close:focus {
