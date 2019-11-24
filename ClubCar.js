@@ -567,6 +567,7 @@ socket.on("removePlayer" , function(data) {
 });
 
 socket.on("update" , function(data) {
+    if (data.playerID != playerID){
     cars[data.playerID].score = data.score;
     cars[data.playerID].x = data.x;
     cars[data.playerID].y = data.y;
@@ -576,6 +577,7 @@ socket.on("update" , function(data) {
     cars[data.playerID].angleSpeed = data.angleSpeed;
     cars[data.playerID].speedMod = data.speedMod;
     cars[data.playerID].angleMod = data.angleMod;
+    }
 });
 
 socket.on("move" , function(data) {
