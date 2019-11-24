@@ -3,13 +3,13 @@ var app = express();
 var server = require("http").createServer(app);
 var io = require("socket.io")(server);
 var mysql = require("mysql");
-const util = require('util');
+var util = require('util');
 
 var con = mysql.createConnection({
     host: "localhost",
     user: "root",
     //Use specified password
-    password: "",
+    password: "SecurityTime6464!",
     //Comment out if not present
     database: "ClubCar"
 })
@@ -88,6 +88,17 @@ var createPlayer = function(id) {
     return player;
 }
 
+function handleResultset(err, result) {
+    var i, len;
+    if (err) {
+        throw err;
+    }
+    len = result.length;
+    for (i = 0; i < len; i += 1) {
+        console.log(result[i]);
+    }
+}
+
 function loginChecks(username , hashPassword) {
     if(username === "") {
         return "Username is empty";
@@ -98,17 +109,25 @@ function loginChecks(username , hashPassword) {
     return "";
 };
 
-function getFromTable(query) {
-
-}
-
 function checkUserName(username) {
-    //con.query("select * from Users where userName  = '" + username + "'", function(err, result) {
+
+    console.log("before query")
+    //console.log(rows);
+    //con.query( 'SELECT * FROM Users', ( err, rows ) => {
         //if (err) throw err;
-        //console.log(result);
-        //if (result.length > 0) {return "Username is already in use"}
-        //return "";
-    //})
+        //console.log(rows);
+    //});
+    console.log("after query")
+    //const rows = con.querySync('select * from Users')
+    /*
+    con.query("select * from Users where userName  = '" + username + "'", function(err, result) {
+        if (err) throw err;
+        console.log(result);
+        if (result.length > 0) {return "Username is already in use"}
+        return "";
+    })
+    */
+    /*
     try {
         console.log("Tried to check")
         //const result = await con.query("select 1 from Users where userName  = '" + username + "'");
@@ -121,6 +140,7 @@ function checkUserName(username) {
     } catch (err) {
         console.log("HELPHEKPKSALFHASADFILHSDFHIL");
     }
+    */
 }
 
 function createAccChecks(username , hashPassword , hashRePassword , reCAPTCHA) {
@@ -137,19 +157,17 @@ function createAccChecks(username , hashPassword , hashRePassword , reCAPTCHA) {
         return "reCAPTCHA uncomplete"
     }
 
-    var continuationCode = null;
+    //var continuationCode = null;
 
-    continuationCode = checkUserName(username);
-    /*
-    con.query("SELECT * FROM Users WHERE userName  = 'ben'", function(err, result,fields) {
-        //con.release();
+    //continuationCode = checkUserName(username);
+
+    con.query("select * from Users where userName  = '" + username + "'", function(err, result) {
         if (err) throw err;
         console.log(result);
-        if (result.length > 0) {continuationCode = "Username is already in use"}
+        if (result.length > 0) {return "Username is already in use"}
     })
-    */
 
-    return continuationCode;
+    return "";
 };
 
 function createAccount(username, hashPassword) {
