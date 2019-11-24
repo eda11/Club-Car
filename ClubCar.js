@@ -316,6 +316,8 @@ class VroomBuck{
     constructor(id,x,y){
         this.id = id;
 
+        this.pickedUp = false
+
         this.x = x;
         this.y = y;
     }
@@ -324,14 +326,18 @@ class VroomBuck{
     }
 
     checkPickUp(car){
-        if(car.checkObjectCollison(this.x-10,this.y-10,  this.x+10,this.y-10,  this.x+10,this.y+10,  this.x-10,this.y+10)){
-            socket.emit("updateVroom",this.id,car.id);
+        if(this.pickedUp == false){
+            if(car.checkObjectCollison(this.x-10,this.y-10,  this.x+10,this.y-10,  this.x+10,this.y+10,  this.x-10,this.y+10)){
+                socket.emit("updateVroom",this.id,car.id);
+                this.pickedUp = true
+            }
         }
     }
 
     update(x,y){
         this.x = x;
         this.y = y;
+        this.pickedUp = false;
     }
 }
 
@@ -432,7 +438,7 @@ function draw() {
     for(i in scarpBuckList){
         scarpBuckList[i].draw(cars[playerID], context)
         if(scarpBuckList[i].checkPickUp(cars[playerID])){
-            socket.emit("removeScrap",i);
+            socket.emit("removeScrap",i,playerID);
         }
     }
 

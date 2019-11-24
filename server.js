@@ -225,7 +225,7 @@ io.on("connection" , function(socket) {
         socket.broadcast.emit("updateVroom",id,VroomBuckList[id].x,VroomBuckList[id].y)
     });
 
-    socket.on("removeScrap",function(id){
+    socket.on("removeScrap",function(id,carID){
         scrapBuckList.splice(id,1);
         playerList[carID].score += 3;
         socket.emit("UpdateScore",carID,playerList[carID].score)
