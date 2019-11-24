@@ -103,6 +103,22 @@ function loginChecks(username , hashPassword) {
     return "";
 };
 
+function getFromTable(query) {
+
+}
+
+function checkUserName(username) {
+    //con.query("select * from Users");
+    //console.log(result);
+    //if (result !== []){return "Username already in use"}
+    con.query("select * from Users where userName  = '" + username + "'", function(err, result) {
+        if (err) throw err;
+        console.log(result);
+        if (result !== []) {return "Username is already in use"}
+        return "";
+    })
+}
+
 function createAccChecks(username , hashPassword , hashRePassword , reCAPTCHA) {
     if(username === "") {
         return "Username is empty";
@@ -117,21 +133,23 @@ function createAccChecks(username , hashPassword , hashRePassword , reCAPTCHA) {
         return "reCAPTCHA uncomplete"
     }
 
-    con.query("select * from Users where userName  = '" + username + "'", function(err, result) {
+    //con.query("select * from Users where userName  = '" + username + "'", function(err, result) {
+        //if (err) throw err;
+        //console.log(result);
+        //if (result !== []) {return "Username is already in use"}
+    //})
+
+    con.query("select 1 from Users where userName  = '" + username + "'", function(err, result) {
         if (err) throw err;
-       console.log(result);
-        if (result !== []) {return "Username is already in use"}
-        console.log("Continuing");
-        var sql = "insert into Users (userName, vroomBuck, hashedPassword, posX, posY, logged) VALUES ?";
-        //var values = ["'" + username + "'", "'" + 0 + "'", "'" + hashPassword + "'", "'" + 500 + "'", "'" + 500 + "'", "'" + false + "'"];
-        var values = ['sayname',0,1234,500,500,false];
-        console.log(sql);
-        console.log(values);
-        con.query(sql, values, function(newErr, newResult) {
-            if (newErr) throw newErr;
-            console.log(newResult);
-        })
+        console.log(result);
+        if (result.length > 0) {return "Username is already in use"}
     })
+
+    return "";
+    
+    //let result = checkUserName(username);
+    //console.log(result);
+    //return result;
 
     //console.log("###-GOT-HERE-###")
     //console.log("select * from Users where userName  = '" + username + "'");
@@ -149,6 +167,17 @@ function createAccChecks(username , hashPassword , hashRePassword , reCAPTCHA) {
     //console.log(newResult);
 
 };
+
+function createAccount(username, hashPassword) {
+    var sql = "insert into Users (userName, vroomBuck, hashedPassword, posX, posY, logged) VALUES (?)";
+    var values = [username,0,hashPassword,500,500,false];
+    console.log(sql);
+    console.log(values);
+    con.query(sql, [values], function(newErr, newResult) {
+        if (newErr) throw newErr;
+        console.log(newResult);
+    })
+}
 
 io.on("connection" , function(socket) {
     console.log("connected");
@@ -172,6 +201,7 @@ io.on("connection" , function(socket) {
         console.log(reCAPTCHA.length);
         txt = createAccChecks(username , hashPassword , hashRePassword , reCAPTCHA);
         if(txt === "") {
+            createAccount(username, hashPassword);
             socket.emit("start");
         }
         else {
