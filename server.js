@@ -4,7 +4,7 @@ var server = require("http").createServer(app);
 var io = require("socket.io")(server);
 var mysql = require("mysql");
 
-
+/*
 var con = mysql.createConnection({
     host: "localhost",
     user: "root",
@@ -30,7 +30,7 @@ con.connect(function(err) {
         //console.log("Table created");
     //});
 })
-
+*/
 
 app.get("/" , function(req , res) {
     res.sendFile(__dirname + "/ClubCar.html");
@@ -139,11 +139,13 @@ function createAccChecks(username , hashPassword , hashRePassword , reCAPTCHA) {
         //if (result !== []) {return "Username is already in use"}
     //})
 
+    /*
     con.query("select 1 from Users where userName  = '" + username + "'", function(err, result) {
         if (err) throw err;
         console.log(result);
         if (result.length > 0) {return "Username is already in use"}
     })
+    */
 
     return "";
     
@@ -168,6 +170,7 @@ function createAccChecks(username , hashPassword , hashRePassword , reCAPTCHA) {
 
 };
 
+/*
 function createAccount(username, hashPassword) {
     var sql = "insert into Users (userName, vroomBuck, hashedPassword, posX, posY, logged) VALUES (?)";
     var values = [username,0,hashPassword,500,500,false];
@@ -178,6 +181,7 @@ function createAccount(username, hashPassword) {
         console.log(newResult);
     })
 }
+*/
 
 io.on("connection" , function(socket) {
     console.log("connected");
@@ -201,7 +205,7 @@ io.on("connection" , function(socket) {
         console.log(reCAPTCHA.length);
         txt = createAccChecks(username , hashPassword , hashRePassword , reCAPTCHA);
         if(txt === "") {
-            createAccount(username, hashPassword);
+            // createAccount(username, hashPassword);
             socket.emit("start");
         }
         else {
@@ -209,18 +213,20 @@ io.on("connection" , function(socket) {
         }
     });
 
-    // we create an id that we assign to a player
-    socket.id = playerCount;
-    playerCount++;
+    socket.on("start" , function() {
+        // we create an id that we assign to a player
+        socket.id = playerCount;
+        playerCount++;
 
-    // we add the new connected player to a list of all other current players
-    socketList[socket.id] = socket;
-    var player = createPlayer(socket.id);
-    playerList[socket.id] = player;
-    socket.broadcast.emit("getMessage","Car" + socket.id + " Has Connected!");
+        // we add the new connected player to a list of all other current players
+        socketList[socket.id] = socket;
+        var player = createPlayer(socket.id);
+        playerList[socket.id] = player;
+        socket.broadcast.emit("getMessage","Car" + socket.id + " Has Connected!");
 
-    socket.emit("initialize" , socket.id , playerList , VroomBuckList,scrapBuckList);
-    socket.broadcast.emit("addPlayer" , playerList[socket.id]);
+        socket.emit("initialize" , socket.id , playerList , VroomBuckList,scrapBuckList);
+        socket.broadcast.emit("addPlayer" , playerList[socket.id]);
+    });
 
     socket.on("update" , function(data) {
         playerList[socket.id] = data;
@@ -259,7 +265,6 @@ io.on("connection" , function(socket) {
             var newMessage = "Car" + playerList[socket.id].playerID + ":" + message.text;
             socket.broadcast.emit("getMessage",newMessage);
         }
-
     });
 
     socket.on("disconnect" , function() {
