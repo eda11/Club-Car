@@ -178,6 +178,7 @@ class Car {
         if (thisSpeed < carSpeed){
             var removed = Math.round(this.score/2);
             this.score -= removed
+            socket.emit("remove",removed)
             socket.emit("newScrap",this.x,this.y,Math.round(removed/5));
         }
 
@@ -316,7 +317,7 @@ class VroomBuck{
     constructor(id,x,y){
         this.id = id;
 
-        this.pickedUp = false
+        this.pickedUp = false;
 
         this.x = x;
         this.y = y;
@@ -344,6 +345,7 @@ class VroomBuck{
 class ScrapBuck{
     constructor(id,x,y){
         this.id = id;
+        this.pickedUp = false;
 
         this.x = x;
         this.y = y;
@@ -353,8 +355,12 @@ class ScrapBuck{
     }
 
     checkPickUp(car){
-        if(car.checkObjectCollison(this.x-10,this.y-10,  this.x+10,this.y-10,  this.x+10,this.y+10,  this.x-10,this.y+10)){
-            return true;
+        if(this.pickedUp == false){
+            if(car.checkObjectCollison(this.x-10,this.y-10,  this.x+10,this.y-10,  this.x+10,this.y+10,  this.x-10,this.y+10)){
+                this.pickedUp = true;
+                return true;
+            }
+            return false;
         }
         return false;
     }
@@ -399,8 +405,7 @@ socket.on("start" , function() {
     document.getElementById("welcomeBox").style.display = "none";
     document.getElementById("rules").style.display = "none";
     document.getElementById("clubCar").style.display = "initial";
-    logged = true;
-    start();
+    socket.emit("start");
 });
 
 var modal1 = document.getElementById('id01');
@@ -410,7 +415,6 @@ var modal2 = document.getElementById('id02');
 
 // We want to ensure there isn't any data about car's being sent until the user has logged in
 function start() {
-    socket.emit("start");
     var moveInterval = setInterval(function () {
         draw();
         cars[playerID].checkCarCollision();
@@ -474,7 +478,7 @@ function drawChat(){
     
 }
 
-function updateScoreBoard(){
+function updateScoreBoard() {
     socket.emit("updateScore")
 }
 
@@ -521,12 +525,13 @@ function update() {
     socket.emit("update" , update);
 }
 
+// We want to make sure we don't pick up emit's until we are in the game
+
 // we iterate through a list of given players
 socket.on("initialize" , function(id , data, vrooms,scraps) {
     playerID = id;
     for(i in vrooms) VroomBuckList[i] = new VroomBuck(vrooms[i].id,vrooms[i].x,vrooms[i].y);
     for(i in scraps) scarpBuckList[i] = new ScrapBuck(scraps[i].id,scraps[i].x,scraps[i].y);
-    console.log(playerID);
     // create the cars
     for(i in data) {
         cars[data[i].playerID] = new Car(data[i].playerID , data[i].score , data[i].x , data[i].y , data[i].angle , "Sprites/CarTest.png");
@@ -539,72 +544,93 @@ socket.on("initialize" , function(id , data, vrooms,scraps) {
             }
         }
     }
+    logged = true;
+    start();
 });
 
 socket.on("addPlayer" , function(data) {
-    var newCar = new Car(data.playerID , data.score , data.x , data.y , data.angle , "Sprites/CarTest.png");
-    for(i in cars) {
-        cars[i].addCar(newCar);
-        newCar.addCar(cars[i]);
+    if(logged) {
+        var newCar = new Car(data.playerID , data.score , data.x , data.y , data.angle , "Sprites/CarTest.png");
+        for(i in cars) {
+            cars[i].addCar(newCar);
+            newCar.addCar(cars[i]);
+        }
+        cars[data.playerID] = newCar;
     }
-    cars[data.playerID] = newCar;
 });
 
 socket.on("removePlayer" , function(data) {
-    for(i in cars) {
-        cars[i].removeCar(cars[data.playerID]);
+    if(logged) {
+        for(i in cars) {
+            cars[i].removeCar(cars[data.playerID]);
+        }
+        delete cars[data.playerID];
     }
-    delete cars[data.playerID];
 });
 
 socket.on("update" , function(data) {
-    if (data.playerID != playerID){
-    cars[data.playerID].score = data.score;
-    cars[data.playerID].x = data.x;
-    cars[data.playerID].y = data.y;
-    cars[data.playerID].speedX = data.speedX;
-    cars[data.playerID].speedY = data.speedY;
-    cars[data.playerID].angle = data.angle;
-    cars[data.playerID].angleSpeed = data.angleSpeed;
-    cars[data.playerID].speedMod = data.speedMod;
-    cars[data.playerID].angleMod = data.angleMod;
+    if(logged) {
+        if (data.playerID != playerID){
+        cars[data.playerID].score = data.score;
+        cars[data.playerID].x = data.x;
+        cars[data.playerID].y = data.y;
+        cars[data.playerID].speedX = data.speedX;
+        cars[data.playerID].speedY = data.speedY;
+        cars[data.playerID].angle = data.angle;
+        cars[data.playerID].angleSpeed = data.angleSpeed;
+        cars[data.playerID].speedMod = data.speedMod;
+        cars[data.playerID].angleMod = data.angleMod;
+        }
     }
 });
 
 socket.on("UpdateScore", function(id,score){
-    console.log(score);
-    cars[id].score = score;
-})
+    if(logged) {
+        cars[id].score = score;
+    }
+});
 
 socket.on("move" , function(data) {
-    cars[playerID].x = data.x;
-    cars[playerID].y = data.y;
-    cars[playerID].speedX = data.speedX;
-    cars[playerID].speedY = data.speedY;
-    cars[playerID].angle = data.angle;
-    cars[playerID].angleSpeed = data.angleSpeed;
+    if(logged) {
+        cars[playerID].x = data.x;
+        cars[playerID].y = data.y;
+        cars[playerID].speedX = data.speedX;
+        cars[playerID].speedY = data.speedY;
+        cars[playerID].angle = data.angle;
+        cars[playerID].angleSpeed = data.angleSpeed;
+    }
 });
 
 socket.on("getMessage", function(data) {
-    chatLog.push(data);
+    if(logged) {
+        chatLog.push(data);
+    }
 });
 
 socket.on("speed" , function(data) {
-    cars[playerID].score = data
+    if(logged) {
+        cars[playerID].score = data
+    }
 });
 
 socket.on("updateVroom",function(id,x,y){
-    VroomBuckList[id].update(x,y);
+    if(logged) {
+        VroomBuckList[id].update(x,y);
+    }
 });
 
 socket.on("removeScrap",function(id){
-    removeScrapBuck(id);
-})
+    if(logged) {
+        removeScrapBuck(id);
+    }
+});
 
 socket.on("updateScrap",function(scraps){
-    scarpBuckList = [];
-    for(i in scraps) scarpBuckList[i] = new ScrapBuck(scraps[i].id,scraps[i].x,scraps[i].y);
-})
+    if(logged) {
+        scarpBuckList = [];
+        for(i in scraps) scarpBuckList[i] = new ScrapBuck(scraps[i].id,scraps[i].x,scraps[i].y);
+    }
+});
 
 function on() {
   document.getElementById("overlay").style.display = "block";
