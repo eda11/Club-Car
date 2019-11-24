@@ -6,4 +6,4 @@ CREATE TABLE Users (
   posY int,
   logged boolean,
   PRIMARY KEY (userName)
-  );
+);
