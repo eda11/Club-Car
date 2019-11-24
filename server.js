@@ -109,40 +109,15 @@ function loginChecks(username , hashPassword) {
     return "";
 };
 
-function checkUserName(username) {
-    console.log("before query")
-    console.log("after query")
-}
-
+//Callback time
 function getInfo(query, callback) {
     con.query(query, function(err, results){
         if (err) {throw err}
         console.log(results)
         wanted = results;
-
         return callback(results)
     })
 }
-
-/*
-function createAccChecks(username , hashPassword , hashRePassword , reCAPTCHA) {
-    if(username === "") {
-        return "Username is empty";
-    };
-    if(hashPassword == 0) {
-        return "Password is empty";
-    };
-    if(hashPassword != hashRePassword) {
-        return "Passwords are not equal";
-    }
-    if(reCAPTCHA.length == 0) {
-        return "reCAPTCHA uncomplete"
-    }
-*/
-
-    //return con.query("select * from Users where userName  = '" + username + "'");
-    //console.log("after query")
-//};
 
 function createAccount(username, hashPassword) {
     var sql = "insert into Users (userName, vroomBuck, hashedPassword, posX, posY, logged) VALUES (?)";
@@ -152,6 +127,7 @@ function createAccount(username, hashPassword) {
     con.query(sql, [values], function(newErr, newResult) {
         if (newErr) throw newErr;
         console.log(newResult);
+        socket.emit("start");
     })
 }
 
@@ -161,13 +137,18 @@ io.on("connection" , function(socket) {
     socket.on("login" , function(username , hashPassword) {
         console.log(username);
         console.log(hashPassword);
-        txt = loginChecks(username , hashPassword);
-        if(txt === "") {
-            socket.emit("start");
-        }
-        else {
-            socket.emit("errorMsg" , txt , "01");
-        }
+        getInfo("SELECT 1 FROM Users WHERE userName  = '" + username + "' AND hashedPassword = " + hashPassword, function(result){
+            var stuffWanted = '';
+            stuffWanted = result;
+            var txt = '';
+            txt = loginChecks(username , hashPassword);
+            if(txt === "") {
+                socket.emit("start");
+            }
+            else {
+                socket.emit("errorMsg" , txt , "01");
+            }
+        });
     });
 
     socket.on("createAcc" , function(username , hashPassword , hashRePassword , reCAPTCHA) {
@@ -175,7 +156,7 @@ io.on("connection" , function(socket) {
         console.log(hashPassword);
         console.log(hashRePassword);
         console.log(reCAPTCHA.length);
-        getInfo("SELECT * FROM Users WHERE userName  = '" + username + "'", function(result){
+        getInfo("SELECT 1 FROM Users WHERE userName  = '" + username + "'", function(result){
             var txt = "";
             var stuffWanted = '';
             stuffWanted = result;
@@ -196,11 +177,17 @@ io.on("connection" , function(socket) {
             }
             console.log(txt);
             if(txt === "") {
+                console.log("Nice");
+                var sql = "insert into Users (userName, vroomBuck, hashedPassword, posX, posY, logged) VALUES (?)";
+                var values = [username,0,hashPassword,500,500,false];
+                console.log(sql);
+                console.log(values);
+                con.query(sql, [values], function(newErr, newResult) {
+                if (newErr) throw newErr;
+                    console.log(newResult);
+                    socket.emit("start");
+                })
                 //createAccount(username, hashPassword);
-                //var sql = "insert into Users (userName, vroomBuck, hashedPassword, posX, posY, logged) VALUES (?)";
-                //var values = [username,0,hashPassword,500,500,false];
-                //getInfo(sql, )
-                socket.emit("start");
             }
             else {
                 socket.emit("errorMsg" , txt , "02");
