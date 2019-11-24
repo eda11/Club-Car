@@ -279,6 +279,11 @@ io.on("connection" , function(socket) {
         }
     });
 
+    socket.on("remove",function(score){
+        playerList[socket.id].score -= score
+        socket.emit("UpdateScore",socket.id,playerList[socket.id].score)
+    })
+
     socket.on("newScrap",function(x,y,amount){
         if(logged) {
             makeScrap(x,y,amount);

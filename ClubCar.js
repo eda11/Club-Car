@@ -178,6 +178,7 @@ class Car {
         if (thisSpeed < carSpeed){
             var removed = Math.round(this.score/2);
             this.score -= removed
+            socket.emit("remove",removed)
             socket.emit("newScrap",this.x,this.y,Math.round(removed/5));
         }
 
@@ -316,7 +317,7 @@ class VroomBuck{
     constructor(id,x,y){
         this.id = id;
 
-        this.pickedUp = false
+        this.pickedUp = false;
 
         this.x = x;
         this.y = y;
@@ -344,6 +345,7 @@ class VroomBuck{
 class ScrapBuck{
     constructor(id,x,y){
         this.id = id;
+        this.pickedUp = false;
 
         this.x = x;
         this.y = y;
@@ -353,10 +355,12 @@ class ScrapBuck{
     }
 
     checkPickUp(car){
-        if(car.checkObjectCollison(this.x-10,this.y-10,  this.x+10,this.y-10,  this.x+10,this.y+10,  this.x-10,this.y+10)){
-            return true;
+        if(this.pickedUp == false){
+            if(car.checkObjectCollison(this.x-10,this.y-10,  this.x+10,this.y-10,  this.x+10,this.y+10,  this.x-10,this.y+10)){
+                return true;
+            }
+            return false;
         }
-        return false;
     }
 }
 
