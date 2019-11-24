@@ -414,13 +414,13 @@ var modal2 = document.getElementById('id02');
 // We want to ensure there isn't any data about car's being sent until the user has logged in
 function start() {
     socket.emit("start");
-    var moveInterval = setInterval(function () {
-        draw();
-        cars[playerID].checkCarCollision();
-        updateSpeed();
-        update();
-    }, 15);
 }
+
+var moveInterval = setInterval(function () {
+    draw();
+    cars[playerID].checkCarCollision();
+    updateSpeed();
+}, 15);
 // functions used for the game
 
 function removeScrapBuck(index){
@@ -530,7 +530,7 @@ socket.on("initialize" , function(id , data, vrooms,scraps) {
     playerID = id;
     for(i in vrooms) VroomBuckList[i] = new VroomBuck(vrooms[i].id,vrooms[i].x,vrooms[i].y);
     for(i in scraps) scarpBuckList[i] = new ScrapBuck(scraps[i].id,scraps[i].x,scraps[i].y);
-    console.log(scarpBuckList);
+    console.log(playerID);
     // create the cars
     for(i in data) {
         cars[data[i].playerID] = new Car(data[i].playerID , data[i].score , data[i].x , data[i].y , data[i].angle , "Sprites/CarTest.png");
