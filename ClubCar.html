@@ -17,7 +17,7 @@
     </div>
 	
 	<button onclick="document.getElementById('id01').style.display='block'" id = "loginButton" style="width:auto;">Login </button>
-	
+	<button onclick="document.getElementById('id02').style.display='block'" id = "createAccButton" style="width:auto;">Create an Account </button>
 	
 	<div id="id01" class="modal" >
   
@@ -27,13 +27,16 @@
     </div>
 
     <div class="container" id = "login" >
+
       <label for="username"><b>Username</b></label>
-      <input type="text" placeholder="Enter Username" id="username" value="" required>
+      <input type="text" placeholder="Enter Username" id="username01" value="" required>
 
       <label for="password_"><b>Password</b></label>
-      <input type="password" placeholder="Enter Password" id="password" value="" required>
-        
-		<button onclick="submit()">login</button>
+      <input type="password" placeholder="Enter Password" id="password01" value="" required>
+
+      <label class="errors" id="error01"><b>defualt</b></label>
+
+		  <button onclick="login()">login</button>
     </div>
 
 	
@@ -41,7 +44,41 @@
       <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
     </div>
   </form>
-</div>
+  </div>
+
+  <div id="id02" class="modal" >
+  
+
+    <div class="imgcontainer" id = "xButton">
+		<span onclick="document.getElementById('id02').style.display='none'" class="close" title="Close Modal">&times;</span>
+    </div>
+
+    <div class="container" id = "newAcc" >
+
+      <label for="username"><b>Username</b></label>
+      <input type="text" placeholder="Enter Username" id="username02" value="" required>
+
+      <label for="password_"><b>Password</b></label>
+      <input type="password" placeholder="Enter Password" id="password02" value="" required>
+
+      <label for="rePassword_"><b>Confirm Password</b></label>
+      <input type="password" placeholder="Confirm Password" id="rePassword" value="" required>
+
+      <label for="reCAPTCHA"><b>reCAPTCHA</b></label>
+      <script src='https://www.google.com/recaptcha/api.js'></script>
+      <div class="g-recaptcha" data-sitekey="6LcLRsQUAAAAAGkx0Al89Sn6xqB5Rwd2m-x2cU0Q"></div>
+
+      <label class="errors" id="error02"><b>defualt</b></label>
+        
+		  <button onclick="createAcc()">Create Account</button>
+    </div>
+
+	
+    <div class="container" style="background-color:#f1f1f1" id = "cancel">
+      <button type="button" onclick="document.getElementById('id02').style.display='none'" class="cancelbtn">Cancel</button>
+    </div>
+  </form>
+  </div>
 
      <div id="text"></div>
   </body>
@@ -49,9 +86,16 @@
 </html>
 
 <script>
-function submit() {
-  hashPassword = hash(document.getElementById("password").value);
-  socket.emit("login" , document.getElementById("username").value , hashPassword);
+function login() {
+  hashPassword = hash(document.getElementById("password01").value);
+  socket.emit("login" , document.getElementById("username01").value , hashPassword);
+};
+
+function createAcc() {
+  hashPassword = hash(document.getElementById("password02").value);
+  hashRePassword = hash(document.getElementById("rePassword").value);
+  reCAPTCHA = grecaptcha.getResponse();
+  socket.emit("createAcc" , document.getElementById("username02").value , hashPassword , hashRePassword , reCAPTCHA);
 };
 
 function hash(text) {
@@ -59,20 +103,28 @@ function hash(text) {
     for(i = 0 ; i < text.length ; i++)
     hashKey = 33*hashKey + text.charCodeAt(i);
 	return hashKey;
-}
+};
 
-socket.emit("test");
+socket.on("errorMsg" , function(msg , label) {
+  document.getElementById("error"+label).style.display = "initial";
+  document.getElementById("error"+label).style.color = "red";
+  document.getElementById("error"+label).innerHTML = "<b>"+msg+"</b>";
+});
+
 
 socket.on("start" , function() {
   document.getElementById("login").style.display = "none";
   document.getElementById("cancel").style.display = "none";
   document.getElementById("xButton").style.display = "none";
   document.getElementById("loginButton").style.display = "none";
+  document.getElementById("createAccButton").style.display = "none";
   document.getElementById("id01").style.display = "none";
+  document.getElementById("id02").style.display = "none";
   document.getElementById("clubCar").style.display = "initial";
-})
+});
 
-var modal = document.getElementById('id01');
+var modal1 = document.getElementById('id01');
+var modal2 = document.getElementById('id02');
 
 
 </script>
