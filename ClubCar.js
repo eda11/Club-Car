@@ -35,7 +35,8 @@ var cars = [];
 var chatLog = [];
 var scoreBoard = [];
 var VroomBuckList = [];
-scarpBuckList = [];
+var scarpBuckList = [];
+var logged = false;
 
 var message = "";
 
@@ -68,6 +69,9 @@ class Car {
 
         this.tempSpeedX = 0;
         this.tempSpeedY = 0;
+
+        this.speedMod = 0;
+        this.angleMod = 0;
 
         //This contains the angle and image of the car
         this.angle = angle;
@@ -212,6 +216,7 @@ class Car {
             this.speedX += this.collisionX;
             this.speedY += this.collisionY;
             this.angleSpeed += this.collisionAngle;
+            update();
         }
     }
     checkObjectCollison(x1,y1,x2,y2,x3,y3,x4,y4){
@@ -269,7 +274,7 @@ class Car {
         context.restore();
     }
 
-    calculateSpeed(speedMod,angleMod){
+    calculateSpeed(){
 
         //Handles collisions with other cars
         if(this.collisionDelay > 0) this.collisionDelay--;
@@ -282,9 +287,9 @@ class Car {
         this.maxSpeed = 6 + 0.02*this.score;
 
         //Increase the speed in the correct direction
-        this.angleSpeed += angleMod*0.005;
-        this.speedX += this.accelaration*Math.cos(this.angle)*speedMod; 
-        this.speedY += this.accelaration*Math.sin(this.angle)*speedMod;
+        this.angleSpeed += this.angleMod*0.005;
+        this.speedX += this.accelaration*Math.cos(this.angle)*this.speedMod; 
+        this.speedY += this.accelaration*Math.sin(this.angle)*this.speedMod;
 
         //Decrease the speeds by the friction
         this.angleSpeed = Approach(this.angleSpeed,0,0.005*Math.abs(this.angleSpeed/0.06))
@@ -359,13 +364,64 @@ class ScrapBuck{
     }
 }
 
+// functions used for logging in
+
+function login() {
+    hashPassword = hash(document.getElementById("password01").value);
+    socket.emit("login" , document.getElementById("username01").value , hashPassword);
+};
+  
+function createAcc() {
+    hashPassword = hash(document.getElementById("password02").value);
+    hashRePassword = hash(document.getElementById("rePassword").value);
+    reCAPTCHA = grecaptcha.getResponse();
+    socket.emit("createAcc" , document.getElementById("username02").value , hashPassword , hashRePassword , reCAPTCHA);
+};
+  
+function hash(text) {
+    hashKey = 0;
+        for(i = 0 ; i < text.length ; i++)
+        hashKey = 33*hashKey + text.charCodeAt(i);
+        return hashKey;
+};
+  
+socket.on("errorMsg" , function(msg , label) {
+    document.getElementById("error"+label).style.display = "initial";
+    document.getElementById("error"+label).style.color = "red";
+    document.getElementById("error"+label).innerHTML = "<b>"+msg+"</b>";
+});
+  
+  
+socket.on("start" , function() {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("cancel").style.display = "none";
+    document.getElementById("xButton").style.display = "none";
+    document.getElementById("loginButton").style.display = "none";
+    document.getElementById("createAccButton").style.display = "none";
+    document.getElementById("id01").style.display = "none";
+    document.getElementById("id02").style.display = "none";
+    document.getElementById("welcomeBox").style.display = "none";
+    document.getElementById("clubCar").style.display = "initial";
+    logged = true;
+    start();
+});
+
+var modal1 = document.getElementById('id01');
+var modal2 = document.getElementById('id02');
+
+
+
+// We want to ensure there isn't any data about car's being sent until the user has logged in
+function start() {
+    socket.emit("start");
+}
 
 var moveInterval = setInterval(function () {
     draw();
     cars[playerID].checkCarCollision();
     updateSpeed();
-    update();
 }, 15);
+// functions used for the game
 
 function removeScrapBuck(index){
     scarpBuckList.splice(index,1)
@@ -445,9 +501,9 @@ function drawScoreBoard(){
 function updateSpeed(){
     for(i in cars) {
         if(i == playerID) {
-            cars[playerID].calculateSpeed(mod , angleMod);
+            cars[playerID].calculateSpeed();
         } else {
-            cars[i].calculateSpeed(0 , 0);
+            cars[i].calculateSpeed();
         }
     }
 }
@@ -463,6 +519,8 @@ function update() {
         speedY: cars[playerID].speedY,
         angle: cars[playerID].angle,
         angleSpeed: cars[playerID].angleSpeed,
+        speedMod: cars[playerID].speedMod,
+        angleMod: cars[playerID].angleMod,
     }
     socket.emit("update" , update);
 }
@@ -472,7 +530,7 @@ socket.on("initialize" , function(id , data, vrooms,scraps) {
     playerID = id;
     for(i in vrooms) VroomBuckList[i] = new VroomBuck(vrooms[i].id,vrooms[i].x,vrooms[i].y);
     for(i in scraps) scarpBuckList[i] = new ScrapBuck(scraps[i].id,scraps[i].x,scraps[i].y);
-    console.log(scarpBuckList);
+    console.log(playerID);
     // create the cars
     for(i in data) {
         cars[data[i].playerID] = new Car(data[i].playerID , data[i].score , data[i].x , data[i].y , data[i].angle , "Sprites/CarTest.png");
@@ -504,6 +562,7 @@ socket.on("removePlayer" , function(data) {
 });
 
 socket.on("update" , function(data) {
+    if (data.playerID != playerID){
     cars[data.playerID].score = data.score;
     cars[data.playerID].x = data.x;
     cars[data.playerID].y = data.y;
@@ -511,6 +570,9 @@ socket.on("update" , function(data) {
     cars[data.playerID].speedY = data.speedY;
     cars[data.playerID].angle = data.angle;
     cars[data.playerID].angleSpeed = data.angleSpeed;
+    cars[data.playerID].speedMod = data.speedMod;
+    cars[data.playerID].angleMod = data.angleMod;
+    }
 });
 
 socket.on("move" , function(data) {
@@ -552,33 +614,42 @@ function off() {
 }
 
 function keyup_handler(event) {
-    //W or S (forwards or reverse)
-    if (event.keyCode == 87 || event.keyCode == 83) {
-        mod = 0;
+    if(logged) {
+        //W or S (forwards or reverse)
+        if (event.keyCode == 87 || event.keyCode == 83) {
+            cars[playerID].speedMod = 0;
+            update();
+        }
+        //A or D (turn left or right)
+        if (event.keyCode == 65 || event.keyCode == 68) {
+            cars[playerID].angleMod = 0;
+            update();
+        }
     }
-    //A or D (turn left or right)
-    if (event.keyCode == 65 || event.keyCode == 68) {
-        angleMod = 0;
-    } 
 }
 
 function keypress_handler(event) {
-    if (!typing) {
+    if (!typing && logged) {
             //W (Forwards)
         if (event.keyCode == 87) {
-            mod = 1;
+            cars[playerID].speedMod = 1;
+            update();
         }
         //S (Reverse)
         if (event.keyCode == 83) {
-            mod = -0.6;
+            cars[playerID].speedMod = -0.6;
+            update();
         }
         //A (Turn left)
         if (event.keyCode == 65) {
-            angleMod = -1;
+            cars[playerID].angleMod = -1;
+            update();
         }
         //D (Turn right)
         if (event.keyCode == 68) {
-            angleMod = 1;
+            cars[playerID].angleMod = 1;
+            update();
+
         }
 
         //Enter (start message)
