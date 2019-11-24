@@ -9,7 +9,7 @@ var con = mysql.createConnection({
     host: "localhost",
     user: "root",
     //Use specified password
-    password: "SecurityTime6464!",
+    password: "",
     //Comment out if not present
     database: "ClubCar"
 })
@@ -110,39 +110,21 @@ function loginChecks(username , hashPassword) {
 };
 
 function checkUserName(username) {
-
     console.log("before query")
-    //console.log(rows);
-    //con.query( 'SELECT * FROM Users', ( err, rows ) => {
-        //if (err) throw err;
-        //console.log(rows);
-    //});
     console.log("after query")
-    //const rows = con.querySync('select * from Users')
-    /*
-    con.query("select * from Users where userName  = '" + username + "'", function(err, result) {
-        if (err) throw err;
-        console.log(result);
-        if (result.length > 0) {return "Username is already in use"}
-        return "";
-    })
-    */
-    /*
-    try {
-        console.log("Tried to check")
-        //const result = await con.query("select 1 from Users where userName  = '" + username + "'");
-        con.query("select * from Users where userName  = '" + username + "'", function(err, result) {
-            if (err) throw err;
-            console.log(result);
-            if (result.length > 0) {return "Username is already in use"}
-            return "";
-        })
-    } catch (err) {
-        console.log("HELPHEKPKSALFHASADFILHSDFHIL");
-    }
-    */
 }
 
+function getInfo(query, callback) {
+    con.query(query, function(err, results){
+        if (err) {throw err}
+        console.log(results)
+        wanted = results;
+
+        return callback(results)
+    })
+}
+
+/*
 function createAccChecks(username , hashPassword , hashRePassword , reCAPTCHA) {
     if(username === "") {
         return "Username is empty";
@@ -156,19 +138,11 @@ function createAccChecks(username , hashPassword , hashRePassword , reCAPTCHA) {
     if(reCAPTCHA.length == 0) {
         return "reCAPTCHA uncomplete"
     }
+*/
 
-    //var continuationCode = null;
-
-    //continuationCode = checkUserName(username);
-
-    con.query("select * from Users where userName  = '" + username + "'", function(err, result) {
-        if (err) throw err;
-        console.log(result);
-        if (result.length > 0) {return "Username is already in use"}
-    })
-
-    return "";
-};
+    //return con.query("select * from Users where userName  = '" + username + "'");
+    //console.log("after query")
+//};
 
 function createAccount(username, hashPassword) {
     var sql = "insert into Users (userName, vroomBuck, hashedPassword, posX, posY, logged) VALUES (?)";
@@ -201,14 +175,37 @@ io.on("connection" , function(socket) {
         console.log(hashPassword);
         console.log(hashRePassword);
         console.log(reCAPTCHA.length);
-        txt = createAccChecks(username , hashPassword , hashRePassword , reCAPTCHA);
-        if(txt === "") {
-            createAccount(username, hashPassword);
-            socket.emit("start");
-        }
-        else {
-            socket.emit("errorMsg" , txt , "02");
-        }
+        getInfo("SELECT * FROM Users WHERE userName  = '" + username + "'", function(result){
+            var txt = "";
+            var stuffWanted = '';
+            stuffWanted = result;
+            if (stuffWanted.length > 0 ){txt = "Username in use"}
+            else {
+                if(username === "") {
+                    txt = "Username is empty";
+                }
+                else if(hashPassword == 0) {
+                    txt = "Password is empty";
+                }
+                else if(hashPassword != hashRePassword) {
+                    txt = "Passwords are not equal";
+                }
+                else if(reCAPTCHA.length == 0) {
+                    txt = "reCAPTCHA uncomplete"
+                }
+            }
+            console.log(txt);
+            if(txt === "") {
+                //createAccount(username, hashPassword);
+                //var sql = "insert into Users (userName, vroomBuck, hashedPassword, posX, posY, logged) VALUES (?)";
+                //var values = [username,0,hashPassword,500,500,false];
+                //getInfo(sql, )
+                socket.emit("start");
+            }
+            else {
+                socket.emit("errorMsg" , txt , "02");
+            }
+        })
     });
 
     socket.on("start" , function() {
@@ -228,7 +225,7 @@ io.on("connection" , function(socket) {
     });
 
     socket.on("update" , function(data) {
-        var severScore = playerList[socket.id].score;
+        //var severScore = playerList[socket.id].score;
         playerList[socket.id] = data;
         playerList[socket.id].score = severScore
         if(playerCount > 1) {
