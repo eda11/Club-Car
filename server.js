@@ -45,6 +45,11 @@ class VroomBuck{
         this.x = x;
         this.y = y;
     }
+
+    move(){
+        this.x = Math.round(Math.random()*3960)+10
+        this.y = Math.round(Math.random()*3960)+10
+    }
 }
 
 class ScrapBuck{
@@ -57,12 +62,12 @@ class ScrapBuck{
 }
 
 function makeScrap(x,y,amount){
-    for(i =0;i<amount;i++){
+    for(i=0;i<amount;i++){
         scrapBuckList.push(new ScrapBuck(i,x+Math.round(Math.random()*60),y+Math.round(Math.random()*60)))
     }
 }
 
-for(i = 0; i<100;i++){
+for(i = 0; i<400;i++){
     VroomBuckList[i] = new VroomBuck(i,Math.round(Math.random()*3960)+10,Math.round(Math.random()*3960)+10);
 }
 
@@ -207,7 +212,7 @@ io.on("connection" , function(socket) {
     });
 
     socket.on("start" , function() {
-        looged = true;
+        logged = true;
         // we create an id that we assign to a player
         socket.id = playerCount;
         playerCount++;
@@ -223,20 +228,25 @@ io.on("connection" , function(socket) {
     });
 
     socket.on("update" , function(data) {
+        var severScore = playerList[socket.id].score;
         playerList[socket.id] = data;
-    
+        playerList[socket.id].score = severScore
         if(playerCount > 1) {
             socket.broadcast.emit("update" , playerList[socket.id]);
         }
     });
 
-    socket.on("updateVroom",function(id,x,y){
-        VroomBuckList[id].update(x,y)
-        socket.broadcast.emit("updateVroom",id,x,y)
+    socket.on("updateVroom",function(id,carID){
+        VroomBuckList[id].move();
+        playerList[carID].score += 1;
+        socket.emit("UpdateScore",carID,playerList[carID].score)
+        socket.broadcast.emit("updateVroom",id,VroomBuckList[id].x,VroomBuckList[id].y)
     });
 
-    socket.on("removeScrap",function(id){
+    socket.on("removeScrap",function(id,carID){
         scrapBuckList.splice(id,1);
+        playerList[carID].score += 3;
+        socket.emit("UpdateScore",carID,playerList[carID].score)
         socket.broadcast.emit("removeScrap",id);
     });
 
@@ -279,7 +289,7 @@ io.on("connection" , function(socket) {
     socket.on("newScrap",function(x,y,amount){
         makeScrap(x,y,amount);
         socket.broadcast.emit("updateScrap",scrapBuckList);
-    })
+    });
 });
 
 server.listen(3000 , function() {

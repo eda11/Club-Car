@@ -316,6 +316,8 @@ class VroomBuck{
     constructor(id,x,y){
         this.id = id;
 
+        this.pickedUp = false
+
         this.x = x;
         this.y = y;
     }
@@ -324,22 +326,18 @@ class VroomBuck{
     }
 
     checkPickUp(car){
-        if(car.checkObjectCollison(this.x-10,this.y-10,  this.x+10,this.y-10,  this.x+10,this.y+10,  this.x-10,this.y+10)){
-            console.log("Collide");
-            car.score += 1;
-            this.move();
+        if(this.pickedUp == false){
+            if(car.checkObjectCollison(this.x-10,this.y-10,  this.x+10,this.y-10,  this.x+10,this.y+10,  this.x-10,this.y+10)){
+                socket.emit("updateVroom",this.id,car.id);
+                this.pickedUp = true
+            }
         }
     }
 
     update(x,y){
         this.x = x;
         this.y = y;
-    }
-
-    move(){
-        this.x = Math.round(Math.random()*3960)+10
-        this.y = Math.round(Math.random()*3960)+10
-        socket.emit("updateVroom",this.id,this.x,this.y);
+        this.pickedUp = false;
     }
 }
 
@@ -356,8 +354,6 @@ class ScrapBuck{
 
     checkPickUp(car){
         if(car.checkObjectCollison(this.x-10,this.y-10,  this.x+10,this.y-10,  this.x+10,this.y+10,  this.x-10,this.y+10)){
-            console.log("Collide");
-            car.score += 3;
             return true;
         }
         return false;
@@ -401,6 +397,7 @@ socket.on("start" , function() {
     document.getElementById("id01").style.display = "none";
     document.getElementById("id02").style.display = "none";
     document.getElementById("welcomeBox").style.display = "none";
+    document.getElementById("rules").style.display = "none";
     document.getElementById("clubCar").style.display = "initial";
     logged = true;
     start();
@@ -414,13 +411,12 @@ var modal2 = document.getElementById('id02');
 // We want to ensure there isn't any data about car's being sent until the user has logged in
 function start() {
     socket.emit("start");
+    var moveInterval = setInterval(function () {
+        draw();
+        cars[playerID].checkCarCollision();
+        updateSpeed();
+    }, 15);
 }
-
-var moveInterval = setInterval(function () {
-    draw();
-    cars[playerID].checkCarCollision();
-    updateSpeed();
-}, 15);
 // functions used for the game
 
 function removeScrapBuck(index){
@@ -443,7 +439,7 @@ function draw() {
     for(i in scarpBuckList){
         scarpBuckList[i].draw(cars[playerID], context)
         if(scarpBuckList[i].checkPickUp(cars[playerID])){
-            socket.emit("removeScrap",i);
+            socket.emit("removeScrap",i,playerID);
         }
     }
 
@@ -575,6 +571,11 @@ socket.on("update" , function(data) {
     }
 });
 
+socket.on("UpdateScore", function(id,score){
+    console.log(score);
+    cars[id].score = score;
+})
+
 socket.on("move" , function(data) {
     cars[playerID].x = data.x;
     cars[playerID].y = data.y;
@@ -659,28 +660,30 @@ function keypress_handler(event) {
     }
     else {
         //Begin typing
-        if (event.keyCode == 13){
-            typing = false;
-            if (message.length != 0) {
-                //Send the message
-                var sendMessage = {
-                    text: message 
+        if(logged) {
+            if (event.keyCode == 13){
+                typing = false;
+                if (message.length != 0) {
+                    //Send the message
+                    var sendMessage = {
+                        text: message 
+                    }
+                    socket.emit("sendMessage",sendMessage);
+                    message = "";
                 }
-                socket.emit("sendMessage",sendMessage);
-                message = "";
             }
-        }
-        //Backspace
-        else if (event.keyCode == 8){
-            if (message.length != 0) {
-                var tempString = message.substring(0,message.length-1);
-                message = tempString;
+            //Backspace
+            else if (event.keyCode == 8){
+                if (message.length != 0) {
+                    var tempString = message.substring(0,message.length-1);
+                    message = tempString;
+                }
             }
-        }
-        else {
-            //Add to the message
-            if ((event.key).length == 1 && message.length < 60) {
-                message += event.key;
+            else {
+                //Add to the message
+                if ((event.key).length == 1 && message.length < 60) {
+                    message += event.key;
+                }
             }
         }
     }
