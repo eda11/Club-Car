@@ -56,12 +56,12 @@ class ScrapBuck{
 }
 
 function makeScrap(x,y,amount){
-    for(i =0;i<amount;i++){
+    for(i=0;i<amount;i++){
         scrapBuckList.push(new ScrapBuck(i,x+Math.round(Math.random()*60),y+Math.round(Math.random()*60)))
     }
 }
 
-for(i = 0; i<100;i++){
+for(i = 0; i<400;i++){
     VroomBuckList[i] = new VroomBuck(i,Math.round(Math.random()*3960)+10,Math.round(Math.random()*3960)+10);
 }
 
@@ -176,7 +176,7 @@ io.on("connection" , function(socket) {
     });
 
     socket.on("start" , function() {
-        looged = true;
+        logged = true;
         // we create an id that we assign to a player
         socket.id = playerCount;
         playerCount++;

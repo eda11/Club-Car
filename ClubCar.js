@@ -414,13 +414,12 @@ var modal2 = document.getElementById('id02');
 // We want to ensure there isn't any data about car's being sent until the user has logged in
 function start() {
     socket.emit("start");
+    var moveInterval = setInterval(function () {
+        draw();
+        cars[playerID].checkCarCollision();
+        updateSpeed();
+    }, 15);
 }
-
-var moveInterval = setInterval(function () {
-    draw();
-    cars[playerID].checkCarCollision();
-    updateSpeed();
-}, 15);
 // functions used for the game
 
 function removeScrapBuck(index){
@@ -659,28 +658,30 @@ function keypress_handler(event) {
     }
     else {
         //Begin typing
-        if (event.keyCode == 13){
-            typing = false;
-            if (message.length != 0) {
-                //Send the message
-                var sendMessage = {
-                    text: message 
+        if(logged) {
+            if (event.keyCode == 13){
+                typing = false;
+                if (message.length != 0) {
+                    //Send the message
+                    var sendMessage = {
+                        text: message 
+                    }
+                    socket.emit("sendMessage",sendMessage);
+                    message = "";
                 }
-                socket.emit("sendMessage",sendMessage);
-                message = "";
             }
-        }
-        //Backspace
-        else if (event.keyCode == 8){
-            if (message.length != 0) {
-                var tempString = message.substring(0,message.length-1);
-                message = tempString;
+            //Backspace
+            else if (event.keyCode == 8){
+                if (message.length != 0) {
+                    var tempString = message.substring(0,message.length-1);
+                    message = tempString;
+                }
             }
-        }
-        else {
-            //Add to the message
-            if ((event.key).length == 1 && message.length < 60) {
-                message += event.key;
+            else {
+                //Add to the message
+                if ((event.key).length == 1 && message.length < 60) {
+                    message += event.key;
+                }
             }
         }
     }
