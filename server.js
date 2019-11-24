@@ -45,6 +45,11 @@ class VroomBuck{
         this.x = x;
         this.y = y;
     }
+
+    move(){
+        this.x = Math.round(Math.random()*3960)+10
+        this.y = Math.round(Math.random()*3960)+10
+    }
 }
 
 class ScrapBuck{
@@ -205,20 +210,25 @@ io.on("connection" , function(socket) {
     });
 
     socket.on("update" , function(data) {
+        var severScore = playerList[socket.id].score;
         playerList[socket.id] = data;
-    
+        playerList[socket.id].score = severScore
         if(playerCount > 1) {
             socket.broadcast.emit("update" , playerList[socket.id]);
         }
     });
 
-    socket.on("updateVroom",function(id,x,y){
-        VroomBuckList[id].update(x,y)
-        socket.broadcast.emit("updateVroom",id,x,y)
+    socket.on("updateVroom",function(id,carID){
+        VroomBuckList[id].move();
+        playerList[carID].score += 1;
+        socket.emit("UpdateScore",carID,playerList[carID].score)
+        socket.broadcast.emit("updateVroom",id,VroomBuckList[id].x,VroomBuckList[id].y)
     });
 
     socket.on("removeScrap",function(id){
         scrapBuckList.splice(id,1);
+        playerList[carID].score += 3;
+        socket.emit("UpdateScore",carID,playerList[carID].score)
         socket.broadcast.emit("removeScrap",id);
     });
 
