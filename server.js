@@ -30,6 +30,7 @@ var playerCount = 0;
 var VroomBuckList = [];
 var scrapBuckList = [];
 var chatLog = {};
+var logged = false;
 
 class VroomBuck{
     constructor(id,x,y){
@@ -174,22 +175,25 @@ io.on("connection" , function(socket) {
         }
     });
 
-    // we create an id that we assign to a player
-    socket.id = playerCount;
-    playerCount++;
+    socket.on("start" , function() {
+        looged = true;
+        // we create an id that we assign to a player
+        socket.id = playerCount;
+        playerCount++;
 
-    // we add the new connected player to a list of all other current players
-    socketList[socket.id] = socket;
-    var player = createPlayer(socket.id);
-    playerList[socket.id] = player;
-    socket.broadcast.emit("getMessage","Car" + socket.id + " Has Connected!");
+        // we add the new connected player to a list of all other current players
+        socketList[socket.id] = socket;
+        var player = createPlayer(socket.id);
+        playerList[socket.id] = player;
+        socket.broadcast.emit("getMessage","Car" + socket.id + " Has Connected!");
 
-    socket.emit("initialize" , socket.id , playerList , VroomBuckList,scrapBuckList);
-    socket.broadcast.emit("addPlayer" , playerList[socket.id]);
+        socket.emit("initialize" , socket.id , playerList , VroomBuckList,scrapBuckList);
+        socket.broadcast.emit("addPlayer" , playerList[socket.id]);
+    });
 
     socket.on("update" , function(data) {
         playerList[socket.id] = data;
-        
+    
         if(playerCount > 1) {
             socket.broadcast.emit("update" , playerList[socket.id]);
         }
@@ -228,11 +232,13 @@ io.on("connection" , function(socket) {
     });
 
     socket.on("disconnect" , function() {
-        socket.broadcast.emit("removePlayer" , playerList[socket.id]);
         console.log("disconnected");
-        delete socketList[socket.id];
-        delete playerList[socket.id];
-        socket.broadcast.emit("getMessage","Car" + socket.id + " has disconnected...");
+        if(logged) {
+            socket.broadcast.emit("removePlayer" , playerList[socket.id]);
+            delete socketList[socket.id];
+            delete playerList[socket.id];
+            socket.broadcast.emit("getMessage","Car" + socket.id + " has disconnected...");
+        }
     });
 
     socket.on("test" , function() {

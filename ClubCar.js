@@ -402,6 +402,7 @@ socket.on("start" , function() {
     document.getElementById("id02").style.display = "none";
     document.getElementById("welcomeBox").style.display = "none";
     document.getElementById("clubCar").style.display = "initial";
+    logged = true;
     start();
 });
 
@@ -420,12 +421,6 @@ function start() {
         update();
     }, 15);
 }
-
-var moveInterval = setInterval(function () {
-    draw();
-    cars[playerID].checkCarCollision();
-    updateSpeed();
-}, 15);
 // functions used for the game
 
 function removeScrapBuck(index){
@@ -619,20 +614,22 @@ function off() {
 }
 
 function keyup_handler(event) {
-    //W or S (forwards or reverse)
-    if (event.keyCode == 87 || event.keyCode == 83) {
-        cars[playerID].speedMod = 0;
-        update();
+    if(logged) {
+        //W or S (forwards or reverse)
+        if (event.keyCode == 87 || event.keyCode == 83) {
+            cars[playerID].speedMod = 0;
+            update();
+        }
+        //A or D (turn left or right)
+        if (event.keyCode == 65 || event.keyCode == 68) {
+            cars[playerID].angleMod = 0;
+            update();
+        }
     }
-    //A or D (turn left or right)
-    if (event.keyCode == 65 || event.keyCode == 68) {
-        cars[playerID].angleMod = 0;
-        update();
-    } 
 }
 
 function keypress_handler(event) {
-    if (!typing) {
+    if (!typing && logged) {
             //W (Forwards)
         if (event.keyCode == 87) {
             cars[playerID].speedMod = 1;
