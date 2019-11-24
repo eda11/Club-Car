@@ -242,7 +242,7 @@ io.on("connection" , function(socket) {
         if(logged) {
             VroomBuckList[id].move();
             playerList[carID].score += 1;
-            socket.emit("UpdateScore",carID,playerList[carID].score)
+            socket.broadcast.emit("UpdateScore",carID,playerList[carID].score)
             socket.broadcast.emit("updateVroom",id,VroomBuckList[id].x,VroomBuckList[id].y)
         }
     });
@@ -251,7 +251,7 @@ io.on("connection" , function(socket) {
         if(logged) {
             scrapBuckList.splice(id,1);
             playerList[carID].score += 3;
-            socket.emit("UpdateScore",carID,playerList[carID].score)
+            socket.broadcast.emit("UpdateScore",carID,playerList[carID].score)
             socket.broadcast.emit("removeScrap",id);
         }
     });
@@ -281,7 +281,7 @@ io.on("connection" , function(socket) {
 
     socket.on("remove",function(score){
         playerList[socket.id].score -= score
-        socket.emit("UpdateScore",socket.id,playerList[socket.id].score)
+        socket.broadcast.emit("UpdateScore",socket.id,playerList[socket.id].score)
     })
 
     socket.on("newScrap",function(x,y,amount){

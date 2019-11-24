@@ -357,6 +357,7 @@ class ScrapBuck{
     checkPickUp(car){
         if(this.pickedUp == false){
             if(car.checkObjectCollison(this.x-10,this.y-10,  this.x+10,this.y-10,  this.x+10,this.y+10,  this.x-10,this.y+10)){
+                this.pickedUp = true;
                 return true;
             }
             return false;
@@ -585,7 +586,6 @@ socket.on("update" , function(data) {
 socket.on("UpdateScore", function(id,score){
     if(logged) {
         cars[id].score = score;
-        update();
     }
 });
 
