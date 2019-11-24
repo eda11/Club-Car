@@ -194,7 +194,6 @@ io.on("connection" , function(socket) {
     });
 
     socket.on("start" , function() {
-        logged = true;
         // we create an id that we assign to a player
         socket.id = playerCount;
         playerCount++;
@@ -207,51 +206,66 @@ io.on("connection" , function(socket) {
 
         socket.emit("initialize" , socket.id , playerList , VroomBuckList,scrapBuckList);
         socket.broadcast.emit("addPlayer" , playerList[socket.id]);
+        logged = true;
     });
 
     socket.on("update" , function(data) {
-        var severScore = playerList[socket.id].score;
-        playerList[socket.id] = data;
-        playerList[socket.id].score = severScore
-        if(playerCount > 1) {
-            socket.broadcast.emit("update" , playerList[socket.id]);
+        if(logged) {
+            var severScore = playerList[socket.id].score;
+            playerList[socket.id] = data;
+            playerList[socket.id].score = severScore
+            if(playerCount > 1) {
+                socket.broadcast.emit("update" , playerList[socket.id]);
+            }
         }
     });
 
     socket.on("updateVroom",function(id,carID){
-        VroomBuckList[id].move();
-        playerList[carID].score += 1;
-        socket.emit("UpdateScore",carID,playerList[carID].score)
-        socket.broadcast.emit("updateVroom",id,VroomBuckList[id].x,VroomBuckList[id].y)
+        if(logged) {
+            VroomBuckList[id].move();
+            playerList[carID].score += 1;
+            socket.emit("UpdateScore",carID,playerList[carID].score)
+            socket.broadcast.emit("updateVroom",id,VroomBuckList[id].x,VroomBuckList[id].y)
+        }
     });
 
     socket.on("removeScrap",function(id,carID){
-        scrapBuckList.splice(id,1);
-        playerList[carID].score += 3;
-        socket.emit("UpdateScore",carID,playerList[carID].score)
-        socket.broadcast.emit("removeScrap",id);
+        if(logged) {
+            scrapBuckList.splice(id,1);
+            playerList[carID].score += 3;
+            socket.emit("UpdateScore",carID,playerList[carID].score)
+            socket.broadcast.emit("removeScrap",id);
+        }
     });
 
     socket.on("sendMessage",function(message){
-        if (message.text.length > 60) {message.text = message.text.substring(0, 60)}
-        if(message.text === "!spawn") {
-            playerList[socket.id].x = 800;
-            playerList[socket.id].y = 400;
-            playerList[socket.id].speedX = 0,
-            playerList[socket.id].speedY = 0,
-            playerList[socket.id].angle = 0,
-            playerList[socket.id].angleSpeed = 0,
-            socket.emit("move" , playerList[socket.id]);
+        if(logged) {
+            if (message.text.length > 60) {message.text = message.text.substring(0, 60)}
+            if(message.text === "!spawn") {
+                playerList[socket.id].x = 800;
+                playerList[socket.id].y = 400;
+                playerList[socket.id].speedX = 0,
+                playerList[socket.id].speedY = 0,
+                playerList[socket.id].angle = 0,
+                playerList[socket.id].angleSpeed = 0,
+                socket.emit("move" , playerList[socket.id]);
+            }
+            else if(message.text === "!speedBoost") {
+                playerList[socket.id].score += 1000
+                socket.emit("speed" , playerList[socket.id].score);
+            }
+            else {
+                var newMessage = "Car" + playerList[socket.id].playerID + ":" + message.text;
+                socket.broadcast.emit("getMessage",newMessage);
+            }
         }
-        else if(message.text === "!speedBoost") {
-            playerList[socket.id].score += 1000
-            socket.emit("speed" , playerList[socket.id].score);
-        }
-        else {
-            var newMessage = "Car" + playerList[socket.id].playerID + ":" + message.text;
-            socket.broadcast.emit("getMessage",newMessage);
-        }
+    });
 
+    socket.on("newScrap",function(x,y,amount){
+        if(logged) {
+            makeScrap(x,y,amount);
+            socket.broadcast.emit("updateScrap",scrapBuckList);
+        }
     });
 
     socket.on("disconnect" , function() {
@@ -262,15 +276,6 @@ io.on("connection" , function(socket) {
             delete playerList[socket.id];
             socket.broadcast.emit("getMessage","Car" + socket.id + " has disconnected...");
         }
-    });
-
-    socket.on("test" , function() {
-        console.log("pass");
-    });
-
-    socket.on("newScrap",function(x,y,amount){
-        makeScrap(x,y,amount);
-        socket.broadcast.emit("updateScrap",scrapBuckList);
     });
 });
 
