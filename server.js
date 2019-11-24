@@ -9,7 +9,7 @@ var con = mysql.createConnection({
     host: "localhost",
     user: "root",
     //Use specified password
-    password: "SecurityTime6464!",
+    password: "",
     //Comment out if not present
     database: "ClubCar"
 })
