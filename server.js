@@ -4,18 +4,33 @@ var server = require("http").createServer(app);
 var io = require("socket.io")(server);
 var mysql = require("mysql");
 
-/*
+
 var con = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "",
+    //Use specified password
+    password: "SecurityTime6464!",
+    //Comment out if not present
+    database: "ClubCar"
 })
 
 con.connect(function(err) {
     if (err) throw err;
     console.log("Connected!");
+    //Uncomment to make the database
+    //con.query("CREATE DATABASE ClubCar", function (err, result) {
+        //if (err) throw err;
+        //console.log("Database created");
+    //})
+
+    //Uncomment to make the table
+    //var sql = "CREATE TABLE Users (userName varchar(20),vroomBuck int,hashedPassword varchar(20),posX int,posY int,logged boolean,PRIMARY KEY (userName))";
+    //con.query(sql, function (err, result) {
+        //if (err) throw err;
+        //console.log("Table created");
+    //});
 })
-*/
+
 
 app.get("/" , function(req , res) {
     res.sendFile(__dirname + "/ClubCar.html");
