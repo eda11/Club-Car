@@ -9,7 +9,7 @@ var con = mysql.createConnection({
     host: "localhost",
     user: "root",
     //Use specified password
-    password: "SecurityTime6464!",
+    password: "",
     //Comment out if not present
     database: "ClubCar"
 })
@@ -133,18 +133,18 @@ io.on("connection" , function(socket) {
     console.log("connected");
 
     socket.on("login" , function(username , hashPassword) {
-        getInfo("SELECT 1 FROM Users WHERE userName  = '" + username + "' AND hashedPassword = " + hashPassword, function(result){
+        getInfo("SELECT * FROM Users WHERE userName  = '" + username + "' AND hashedPassword = " + hashPassword, function(result){
             var stuffWanted = '';
             stuffWanted = result;
             var txt = '';
             if (stuffWanted.length == 0) {txt = "Username or Password is wrong"}
+            else if (stuffWanted[0].logged == true) {txt = "Account is in use"}
             if(username === "") {
                 txt = "Username is empty";
             }
             else if(hashPassword == 0) {
                 txt = "Password is empty";
             };
-            //txt = loginChecks(username , hashPassword);
             if(txt === "") {
                 socket.credentials = [username, hashPassword];
                 socket.emit("start");
@@ -207,15 +207,17 @@ io.on("connection" , function(socket) {
         getInfo("SELECT * FROM Users WHERE userName  = '" + socket.credentials[0] + "' AND hashedPassword = " + socket.credentials[1], function(result){
             var stuffWanted = '';
             stuffWanted = result;
+            console.log(stuffWanted[0].logged);
             var player = createPlayer(socket.id, stuffWanted[0].vroomBuck, stuffWanted[0].posX, stuffWanted[0].posY);
-            playerList[socket.id] = player;
-            socket.broadcast.emit("getMessage","Car" + socket.id + " Has Connected!");
-
-            socket.emit("initialize" , socket.id , playerList , VroomBuckList,scrapBuckList);
-            socket.broadcast.emit("addPlayer" , playerList[socket.id]);
-            logged = true;
+            getInfo("UPDATE Users SET logged = 1 WHERE userName  = '" + socket.credentials[0] + "' AND hashedPassword = " + socket.credentials[1], function(result2){
+                playerList[socket.id] = player;
+                socket.broadcast.emit("getMessage",socket.credentials[0] + " Has Connected!");
+    
+                socket.emit("initialize" , socket.id , playerList , VroomBuckList,scrapBuckList);
+                socket.broadcast.emit("addPlayer" , playerList[socket.id]);
+                logged = true;
+            });
         });
-        
     });
 
     socket.on("update" , function(data) {
@@ -264,7 +266,7 @@ io.on("connection" , function(socket) {
                 socket.emit("speed" , playerList[socket.id].score);
             }
             else {
-                var newMessage = "Car" + playerList[socket.id].playerID + ":" + message.text;
+                var newMessage = "" + socket.credentials[0] + ":" + message.text;
                 socket.broadcast.emit("getMessage",newMessage);
             }
         }
@@ -287,13 +289,13 @@ io.on("connection" , function(socket) {
         if(logged) {
             socket.broadcast.emit("removePlayer" , playerList[socket.id]);
             var current = playerList[socket.id];
-            getInfo("UPDATE Users SET vroomBuck = "+ current.score +", posX = "+ current.x +", posY = "+current.y+" WHERE userName  = '" + socket.credentials[0] + "' AND hashedPassword = " + socket.credentials[1], function(result){
+            getInfo("UPDATE Users SET vroomBuck = "+ current.score +", posX = "+ current.x +", posY = "+current.y+", logged = 0 WHERE userName  = '" + socket.credentials[0] + "' AND hashedPassword = " + socket.credentials[1], function(result){
                 var stuffWanted = '';
                 stuffWanted = result;
                 console.log(stuffWanted)
                 delete socketList[socket.id];
                 delete playerList[socket.id];
-                socket.broadcast.emit("getMessage","Car" + socket.id + " has disconnected...");
+                socket.broadcast.emit("getMessage",socket.credentials[0] + " has disconnected...");
             });
         }
     });
