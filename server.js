@@ -5,18 +5,43 @@ var io = require("socket.io")(server);
 var mysql = require("mysql");
 var util = require('util');
 
-var con = mysql.createConnection({
+//Automatic setup
+var startCon = mysql.createConnection({
+    //CREDENTIALS
     host: "localhost",
-    user: "root",
-    //Use specified password
-    password: "",
+    user: "bc110",
+    password: "7cQQtbCD0W",
+})
+
+//Creates the database if not present
+startCon.connect(function(err){
+    //Setup database if not present
+    startCon.query("CREATE DATABASE IF NOT EXISTS ClubCar");
+    startCon.end();
+})
+
+//Create the actual connection
+var con = mysql.createConnection({
+    //CREDENTIALS
+    host: "localhost",
+    user: "bc110",
+    password: "7cQQtbCD0W",
     //Comment out if not present
     database: "ClubCar"
 })
 
 con.connect(function(err) {
-    //if (err) console.log(err);
-    console.log("Connected!");
+
+    //Confirm connection
+    console.log("Connected to Database");
+
+    //Create table if not present
+    con.query("CREATE TABLE IF NOT EXISTS Users (userName varchar(20),vroomBuck int,hashedPassword varchar(20),posX int,posY int,logged boolean,PRIMARY KEY (userName))");
+
+    //Ensure everyone is logged out
+    getInfo("UPDATE Users SET logged = 0", function(result){
+        console.log("Setup Users");
+    });
 })
 
 app.get("/" , function(req , res) {
@@ -89,17 +114,6 @@ var createPlayer = function(id, newScore, newX, newY,newName) {
     return player;
 }
 
-function handleResultset(err, result) {
-    var i, len;
-    if (err) {
-        throw err;
-    }
-    len = result.length;
-    for (i = 0; i < len; i += 1) {
-        console.log(result[i]);
-    }
-}
-
 function loginChecks(username , hashPassword) {
     if(username === "") {
         return "Username is empty";
@@ -114,7 +128,6 @@ function loginChecks(username , hashPassword) {
 function getInfo(query, callback) {
     con.query(query, function(err, results){
         if (err) {throw err}
-        console.log(results)
         wanted = results;
         return callback(results)
     })
@@ -157,10 +170,6 @@ io.on("connection" , function(socket) {
     });
 
     socket.on("createAcc" , function(username , hashPassword , hashRePassword , reCAPTCHA) {
-        console.log(username);
-        console.log(hashPassword);
-        console.log(hashRePassword);
-        console.log(reCAPTCHA.length);
         getInfo("SELECT 1 FROM Users WHERE userName  = '" + username + "'", function(result){
             var txt = "";
             var stuffWanted = '';
@@ -180,7 +189,6 @@ io.on("connection" , function(socket) {
                     txt = "reCAPTCHA uncomplete"
                 }
             }
-            console.log(txt);
             if(txt === "") {
                 console.log("Nice");
                 var sql = "insert into Users (userName, vroomBuck, hashedPassword, posX, posY, logged) VALUES (?)";
@@ -203,8 +211,9 @@ io.on("connection" , function(socket) {
         playerCount++;
 
         // we add the new connected player to a list of all other current players
-        console.log(socket.credentials)
         socketList[socket.id] = socket;
+
+        //Get data from the database
         getInfo("SELECT * FROM Users WHERE userName  = '" + socket.credentials[0] + "' AND hashedPassword = " + socket.credentials[1], function(result){
             var stuffWanted = '';
             stuffWanted = result;
@@ -262,6 +271,16 @@ io.on("connection" , function(socket) {
                 playerList[socket.id].angleSpeed = 0,
                 socket.emit("move" , playerList[socket.id]);
             }
+            else if (message.text === "!reset") {
+                playerList[socket.id].x = 800;
+                playerList[socket.id].y = 400;
+                playerList[socket.id].speedX = 0,
+                playerList[socket.id].speedY = 0,
+                playerList[socket.id].angle = 0,
+                playerList[socket.id].angleSpeed = 0,
+                playerList[socket.id].score
+                socket.emit("move" , playerList[socket.id]);
+            }
             else if(message.text === "!speedBoost") {
                 playerList[socket.id].score += 1000
                 socket.emit("speed" , playerList[socket.id].score);
@@ -278,6 +297,14 @@ io.on("connection" , function(socket) {
         socket.broadcast.emit("UpdateScore",socket.id,playerList[socket.id].score)
     })
 
+    socket.on("getScoreBoard",function(score){
+        scoreBoard = playerList.slice();
+        scoreBoard.sort(function(a, b){
+            return b.score - a.score;
+        });
+
+    })
+
     socket.on("newScrap",function(x,y,amount){
         if(logged) {
             makeScrap(x,y,amount);
@@ -290,10 +317,10 @@ io.on("connection" , function(socket) {
         if(logged) {
             socket.broadcast.emit("removePlayer" , playerList[socket.id]);
             var current = playerList[socket.id];
+            //Log the user off
             getInfo("UPDATE Users SET vroomBuck = "+ current.score +", posX = "+ current.x +", posY = "+current.y+", logged = 0 WHERE userName  = '" + socket.credentials[0] + "' AND hashedPassword = " + socket.credentials[1], function(result){
                 var stuffWanted = '';
                 stuffWanted = result;
-                console.log(stuffWanted)
                 delete socketList[socket.id];
                 delete playerList[socket.id];
                 socket.broadcast.emit("getMessage",socket.credentials[0] + " has disconnected...");
