@@ -56,6 +56,8 @@ class Car {
 
         this.x = x;
         this.y = y;
+
+        this.name = "";
         
         //Initalise the movement vars
         this.friction = 0.3;
@@ -493,7 +495,7 @@ function drawScoreBoard(){
     for (var i = 0; i < 5; i++) {
         if (i > scoreBoard.length -1 ){break;}
         if (scoreBoard[i] == null){break;}
-        context.fillText(""+scoreBoard[i].score, 0, 25 + (i*25));
+        context.fillText(scoreBoard[i].name+ ": "+scoreBoard[i].score, 0, 25 + (i*25));
     }
 }
 
@@ -535,6 +537,7 @@ socket.on("initialize" , function(id , data, vrooms,scraps) {
     // create the cars
     for(i in data) {
         cars[data[i].playerID] = new Car(data[i].playerID , data[i].score , data[i].x , data[i].y , data[i].angle , "Sprites/CarTest.png");
+        cars[data[i].playerID].name = data[i].name;
     }
     // add cars to each other
     for(i in cars) {
@@ -551,6 +554,7 @@ socket.on("initialize" , function(id , data, vrooms,scraps) {
 socket.on("addPlayer" , function(data) {
     if(logged) {
         var newCar = new Car(data.playerID , data.score , data.x , data.y , data.angle , "Sprites/CarTest.png");
+        newCar.name = data.name;
         for(i in cars) {
             cars[i].addCar(newCar);
             newCar.addCar(cars[i]);
