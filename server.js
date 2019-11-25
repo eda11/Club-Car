@@ -8,9 +8,9 @@ var util = require('util');
 //Automatic setup
 var startCon = mysql.createConnection({
     //CREDENTIALS
-    host: "",
-    user: "",
-    password: "",
+    host: "localhost",
+    user: "root",
+    password: "SecurityTime6464!",
 })
 
 //Creates the database if not present
@@ -23,10 +23,9 @@ startCon.connect(function(err){
 //Create the actual connection
 var con = mysql.createConnection({
     //CREDENTIALS
-    host: "",
-    user: "",
-    password: "",
-    //Comment out if not present
+    host: "localhost",
+    user: "root",
+    password: "SecurityTime6464!",
     database: "ClubCar"
 })
 
@@ -189,7 +188,6 @@ io.on("connection" , function(socket) {
                 }
             }
             if(txt === "") {
-                console.log("Nice");
                 var sql = "insert into Users (userName, vroomBuck, hashedPassword, posX, posY, logged) VALUES (?)";
                 var values = [username,0,hashPassword,500,500,false];
                 con.query(sql, [values], function(newErr, newResult) {
