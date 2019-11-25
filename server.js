@@ -10,7 +10,7 @@ var startCon = mysql.createConnection({
     //CREDENTIALS
     host: "localhost",
     user: "root",
-    password: "SecurityTime6464!",
+    password: "",
 })
 
 //Creates the database if not present
@@ -25,7 +25,7 @@ var con = mysql.createConnection({
     //CREDENTIALS
     host: "localhost",
     user: "root",
-    password: "SecurityTime6464!",
+    password: "",
     database: "ClubCar"
 })
 
@@ -95,7 +95,7 @@ for(i = 0; i<400;i++){
     VroomBuckList[i] = new VroomBuck(i,Math.round(Math.random()*3960)+10,Math.round(Math.random()*3960)+10);
 }
 
-var createPlayer = function(id, newScore, newX, newY) {
+var createPlayer = function(id, newScore, newX, newY,newName) {
     // object of all the values of a player we want to recieve/send
     var player = {
         playerID: id,
@@ -108,6 +108,7 @@ var createPlayer = function(id, newScore, newX, newY) {
         angleSpeed: 0,
         speedMod: 0,
         angleMod: 0,
+        name : newName,
     }
     return player;
 }
@@ -136,7 +137,6 @@ function createAccount(username, hashPassword) {
     var values = [username,0,hashPassword,500,500,false];
     con.query(sql, [values], function(newErr, newResult) {
         if (newErr) throw newErr;
-        console.log(newResult);
         socket.emit("start");
     })
 }
@@ -214,11 +214,10 @@ io.on("connection" , function(socket) {
         getInfo("SELECT * FROM Users WHERE userName  = '" + socket.credentials[0] + "' AND hashedPassword = " + socket.credentials[1], function(result){
             var stuffWanted = '';
             stuffWanted = result;
-            var player = createPlayer(socket.id, stuffWanted[0].vroomBuck, stuffWanted[0].posX, stuffWanted[0].posY);
+            var player = createPlayer(socket.id, stuffWanted[0].vroomBuck, stuffWanted[0].posX, stuffWanted[0].posY,socket.credentials[0]);
             getInfo("UPDATE Users SET logged = 1 WHERE userName  = '" + socket.credentials[0] + "' AND hashedPassword = " + socket.credentials[1], function(result2){
                 playerList[socket.id] = player;
                 socket.broadcast.emit("getMessage",socket.credentials[0] + " Has Connected!");
-    
                 socket.emit("initialize" , socket.id , playerList , VroomBuckList,scrapBuckList);
                 socket.broadcast.emit("addPlayer" , playerList[socket.id]);
                 logged = true;
@@ -274,7 +273,7 @@ io.on("connection" , function(socket) {
                 playerList[socket.id].speedY = 0,
                 playerList[socket.id].angle = 0,
                 playerList[socket.id].angleSpeed = 0,
-                playerList[socket.id].score
+                playerList[socket.id].score = 0
                 socket.emit("move" , playerList[socket.id]);
             }
             else if(message.text === "!speedBoost") {
